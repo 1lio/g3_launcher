@@ -1,6 +1,7 @@
 package com.g3.launcher.mapper
 
 import com.g3.launcher.entity.LauncherConfigJson
+import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.LauncherConfig
 
 fun LauncherConfigJson.toConfig(
@@ -8,7 +9,7 @@ fun LauncherConfigJson.toConfig(
 ): LauncherConfig {
     return LauncherConfig(
         installed = installed,
-        language = language,
+        language = G3Language.fromKey(language),
         mods = mods,
         packages = packages,
         gameDirPath = gameDir,
@@ -20,7 +21,7 @@ fun LauncherConfigJson.toConfig(
 fun LauncherConfig.toJson(): LauncherConfigJson {
     return LauncherConfigJson(
         installed = installed,
-        language = language,
+        language = language.key,
         mods = mods,
         packages = packages,
         gameDir = gameDirPath,

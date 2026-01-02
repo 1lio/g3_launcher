@@ -7,7 +7,7 @@ import com.g3.launcher.manager.LauncherManager
 @Immutable
 data class LauncherConfig(
     val installed: Boolean,
-    val language: String,
+    val language: G3Language,
     val packages: List<String>,
     val gameDirPath: String?,
     val gameSaveDirPath: String?,

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import com.g3.launcher.entity.LauncherConfigJson
 import com.g3.launcher.mapper.toConfig
 import com.g3.launcher.mapper.toJson
+import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.LauncherConfig
 import com.g3.launcher.util.json
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,7 @@ object LauncherManager {
     private fun createConfig(): LauncherConfig {
         val defaultConfig = LauncherConfig(
             installed = false,
-            language = RegistryManager.getSystemLanguage(),
+            language = G3Language.fromKey(key = RegistryManager.getSystemLanguage()),
             packages = PackagesManager.getAvailablePackages(),
             gameDirPath = RegistryManager.getGameDir(),
             gameSaveDirPath = RegistryManager.getGameSaveDir(),
