@@ -29,7 +29,6 @@ fun ApplicationScope.InstallPane(
     onClose: () -> Unit = ::exitApplication,
 ) {
     val config = LocalConfig.current
-    val strings = LocalLanguage.current.strings
 
     val stage = viewModel.stage
     val baseDownloadProgress = viewModel.baseProgress
@@ -70,24 +69,15 @@ fun ApplicationScope.InstallPane(
                 onClickNext = viewModel::continueInstall,
             )
 
-            else -> {}
-            /*
+            is Stage.Setup -> InstallationPane(
+                download = viewModel.downloadProgress,
+                progress = viewModel.installProgress,
+                steps = stage.steps
+            )
 
-                        is Stage.Setup -> InstallationPane(
-                            progress = viewModel.progress,
-                            download = viewModel.download,
-                            text = when (stage.step) {
-                                1 -> strings.removingOutdatedFiles
-                                2 -> strings.backupSaves
-                                3 -> "Downloads: "
-                                4 -> "Installing: ${strings.file}: ${stage.num} / ${stage.count}"
-                                else -> ""
-                            }
-                        )
-
-                        is Stage.Error -> FailurePane(
-                            errorMessage = stage.message
-                        )*/
+            is Stage.Error -> FailurePane(
+                errorMessage = stage.message
+            )
         }
 
         if (config.availableUpdate) {
@@ -104,7 +94,9 @@ fun ApplicationScope.InstallPane(
                 .padding(start = 24.dp, bottom = 24.dp)
         )
 
-        if (baseDownloadProgress in 1..99) {
+        if (baseDownloadProgress in 1..99 &&
+            (stage is Stage.Welcome || stage is Stage.PackSelect || stage is Stage.SelectDirs)
+        ) {
             LinearProgress(baseDownloadProgress)
         }
     }
