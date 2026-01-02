@@ -22,6 +22,15 @@ dependencies {
     implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+
+    implementation("io.ktor:ktor-client-core:3.3.3")
+    implementation("io.ktor:ktor-client-cio:3.3.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.3.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.3")
+
+    // Для логирования (опционально)
+    implementation("io.ktor:ktor-client-logging:3.3.3")
+    implementation("ch.qos.logback:logback-classic:1.5.16")
 }
 
 compose.desktop {
