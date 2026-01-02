@@ -72,7 +72,7 @@ object LauncherManager {
 
     fun checkForUpdates() {
         scope.launch {
-            val hasUpdate = LauncherVersionManager.isNewVersionAvailable()
+            val hasUpdate = GitHubManager.isNewVersionAvailable()
             if (config.availableUpdate != hasUpdate) {
                 updateConfig { copy(availableUpdate = hasUpdate) }
             }

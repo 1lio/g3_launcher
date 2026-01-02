@@ -10,7 +10,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object LauncherVersionManager {
+object GitHubManager {
 
     @Serializable
     data class GitHubReleaseResponse(
@@ -75,6 +75,38 @@ object LauncherVersionManager {
         }
 
         return 0
+    }
+
+    suspend fun getLatestReleaseInfo(): GitHubReleaseResponse? {
+        return try {
+            val response = httpClient.get(BASE_URL) {
+                headers {
+                    append(HttpHeaders.Accept, "application/vnd.github.v3+json")
+                }
+            }
+            response.body()
+        } catch (e: Exception) {
+            println("Ошибка при получении информации о релизе: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getAssetDownloadUrl(fileName: String): String? {
+        return try {
+            val release = getLatestReleaseInfo()
+            release?.assets?.find { it.name == fileName }?.browserDownloadUrl
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getAvailableAssets(): List<String> {
+        return try {
+            val release = getLatestReleaseInfo()
+            release?.assets?.map { it.name } ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     fun close() {
