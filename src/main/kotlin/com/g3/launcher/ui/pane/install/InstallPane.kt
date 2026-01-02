@@ -56,36 +56,37 @@ fun ApplicationScope.InstallPane(
                 onClickSetup = viewModel::runInstall
             )
 
+            Stage.PackSelect -> PackageSelectorPane(
+                onClick = viewModel::installPackages
+            )
+
             else -> {}
-            /*Stage.PackSelect -> PackageSelectorPane(
-                onClick = viewModel::install
-            )
+            /*
+                        is Stage.SelectDirs -> DirectorySelectPane(
+                            gameDir = stage.gameDir,
+                            gameDirError = stage.gameDirError,
+                            gameSavesDir = stage.saveDir,
+                            gameSaveError = stage.saveDirErrorPath,
+                            onClickGameDir = viewModel::selectGameDir,
+                            onClickSavesDir = viewModel::selectGameSaveDir,
+                            onClickNext = viewModel::continueInstall,
+                        )
 
-            is Stage.SelectDirs -> DirectorySelectPane(
-                gameDir = stage.gameDir,
-                gameDirError = stage.gameDirError,
-                gameSavesDir = stage.saveDir,
-                gameSaveError = stage.saveDirErrorPath,
-                onClickGameDir = viewModel::selectGameDir,
-                onClickSavesDir = viewModel::selectGameSaveDir,
-                onClickNext = viewModel::continueInstall,
-            )
+                        is Stage.Setup -> InstallationPane(
+                            progress = viewModel.progress,
+                            download = viewModel.download,
+                            text = when (stage.step) {
+                                1 -> strings.removingOutdatedFiles
+                                2 -> strings.backupSaves
+                                3 -> "Downloads: "
+                                4 -> "Installing: ${strings.file}: ${stage.num} / ${stage.count}"
+                                else -> ""
+                            }
+                        )
 
-            is Stage.Setup -> InstallationPane(
-                progress = viewModel.progress,
-                download = viewModel.download,
-                text = when (stage.step) {
-                    1 -> strings.removingOutdatedFiles
-                    2 -> strings.backupSaves
-                    3 -> "Downloads: "
-                    4 -> "Installing: ${strings.file}: ${stage.num} / ${stage.count}"
-                    else -> ""
-                }
-            )
-
-            is Stage.Error -> FailurePane(
-                errorMessage = stage.message
-            )*/
+                        is Stage.Error -> FailurePane(
+                            errorMessage = stage.message
+                        )*/
         }
 
         if (config.availableUpdate) {

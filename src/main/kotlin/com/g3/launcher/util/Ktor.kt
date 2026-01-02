@@ -28,6 +28,6 @@ val largeFileHttpClient = HttpClient(CIO) {
             requestTimeout = 30 * 60 * 1000L // 30 минут
         }
 
-        maxConnectionsCount = 1 // Ограничиваем одновременные подключения
+        maxConnectionsCount = 10
     }
 }

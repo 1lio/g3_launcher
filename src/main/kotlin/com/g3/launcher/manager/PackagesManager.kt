@@ -1,21 +1,9 @@
 package com.g3.launcher.manager
 
-import com.g3.launcher.Constants
-import com.g3.launcher.util.httpClient
-import com.g3.launcher.util.largeFileHttpClient
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import com.g3.launcher.Constants.LAUNCHER_VERSION
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
@@ -26,8 +14,7 @@ import kotlin.math.roundToInt
  * Работа с пакетами установки
  */
 object PackagesManager {
-    private const val REPOSITORY_OWNER = "1lio"
-    private const val REPOSITORY_NAME = "g3_launcher"
+    private const val BASE_URL = "https://github.com/1lio/g3_launcher/releases/download/$LAUNCHER_VERSION"
 
     private const val BASE_PATH: String = "app/resources/base.zip"
     private const val EN_PATH: String = "app/resources/en.zip"
@@ -37,7 +24,10 @@ object PackagesManager {
     private const val RU_PATH: String = "app/resources/ru.zip"
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val downloadMutex = Mutex()
+
+    // Отдельные мьютексы для каждого типа файлов
+    private val baseMutex = Mutex()
+    private val languageMutexes = mutableMapOf<String, Mutex>() // Язык -> Mutex
 
     fun getAvailablePackages(): List<String> {
         val list = mutableListOf<String>()
@@ -70,8 +60,8 @@ object PackagesManager {
     }
 
     suspend fun installBasePackage(onProgress: (Int) -> Unit = {}): Int {
-        val downloadUrl = "https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/releases/download/${Constants.LAUNCHER_VERSION}/base.zip"
-        return downloadMutex.withLock {
+        val downloadUrl = "$BASE_URL/base.zip"
+        return baseMutex.withLock {
             val targetFile = File(BASE_PATH)
 
             // Проверяем существование файла и его целостность
@@ -83,9 +73,7 @@ object PackagesManager {
 
             try {
                 targetFile.parentFile?.mkdirs()
-
                 println("Начинаем загрузку base.zip из: $downloadUrl")
-
                 downloadLargeFileWithResume(downloadUrl, targetFile, onProgress)
 
                 return if (targetFile.exists() && targetFile.length() > 0) {
@@ -102,28 +90,61 @@ object PackagesManager {
         }
     }
 
-    private suspend fun downloadFileWithProgress(
-        url: String,
-        targetFile: File,
-        onProgress: (Int) -> Unit = {}
-    ) {
-        val response = largeFileHttpClient.get(url) {
-            expectSuccess = false
+    suspend fun installLanguagePackage(language: String, onProgress: (Int) -> Unit = {}): Int {
+        val filePath = when (language.lowercase()) {
+            "en" -> EN_PATH
+            "de" -> DE_PATH
+            "fr" -> FR_PATH
+            "pl" -> PL_PATH
+            "ru" -> RU_PATH
+            else -> throw IllegalArgumentException("Неподдерживаемый язык: $language")
+        }
 
-            onDownload { bytesSentTotal, contentLength ->
-                if (contentLength != null) {
-                    val progress = (bytesSentTotal.toFloat() / contentLength * 100).roundToInt()
-                    onProgress(progress.coerceIn(0, 100))
+        val languageMutex = languageMutexes.getOrPut(language) { Mutex() }
+
+        return languageMutex.withLock {
+            val downloadUrl = "$BASE_URL/${language}.zip"
+
+            val targetFile = File(filePath)
+            if (targetFile.exists() && targetFile.length() > 0) {
+                if (verifyFileIntegrity(filePath, getFileSize(downloadUrl))) {
+                    return@withLock 100
                 }
             }
+
+            try {
+                targetFile.parentFile?.mkdirs()
+
+                println("Загружаем $language.zip...")
+                downloadLargeFileWithResume(downloadUrl, targetFile, onProgress)
+
+                return if (targetFile.exists() && targetFile.length() > 0) {
+                    println("$language.zip успешно загружен (${targetFile.length() / 1024} KB)")
+                    100
+                } else {
+                    0
+                }
+            } catch (e: Exception) {
+                println("Ошибка при загрузке $language.zip: ${e.message}")
+                return@withLock 0
+            }
         }
+    }
 
-        if (!response.status.isSuccess()) {
-            throw Exception("Не удалось скачать файл: ${response.status}")
+    suspend fun installMultipleLanguages(
+        languages: List<String>,
+        onProgress: (String, Int) -> Unit = { _, _ -> }
+    ): Map<String, Int> {
+        return coroutineScope {
+            languages.map { language ->
+                async {
+                    val result = installLanguagePackage(language) { progress ->
+                        onProgress(language, progress)
+                    }
+                    language to result
+                }
+            }.awaitAll().toMap()
         }
-
-
-        response.bodyAsChannel().copyAndClose(targetFile.writeChannel())
     }
 
     /**
@@ -209,45 +230,6 @@ object PackagesManager {
         }
     }
 
-    suspend fun installLanguagePackage(language: String, onProgress: (Int) -> Unit = {}): Int {
-        return downloadMutex.withLock {
-            val filePath = when (language.lowercase()) {
-                "en" -> EN_PATH
-                "de" -> DE_PATH
-                "fr" -> FR_PATH
-                "pl" -> PL_PATH
-                "ru" -> RU_PATH
-                else -> throw IllegalArgumentException("Неподдерживаемый язык: $language")
-            }
-
-            val targetFile = File(filePath)
-            if (targetFile.exists() && targetFile.length() > 0) {
-                return@withLock 100
-            }
-
-            try {
-                targetFile.parentFile?.mkdirs()
-                val downloadUrl = if (Constants.LAUNCHER_VERSION.isNotEmpty()) {
-                    "https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/releases/download/${Constants.LAUNCHER_VERSION}/${language}.zip"
-                } else {
-                    "https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/releases/latest/download/${language}.zip"
-                }
-
-                println("Загружаем $language.zip...")
-                downloadFileWithProgress(downloadUrl, targetFile, onProgress)
-
-                return if (targetFile.exists() && targetFile.length() > 0) {
-                    100
-                } else {
-                    0
-                }
-            } catch (e: Exception) {
-                println("Ошибка при загрузке $language.zip: ${e.message}")
-                return@withLock 0
-            }
-        }
-    }
-
     /**
      * Проверяет целостность скачанного файла
      */
@@ -268,6 +250,6 @@ object PackagesManager {
 
     fun dispose() {
         scope.cancel()
-        largeFileHttpClient.close()
+        languageMutexes.clear()
     }
 }
