@@ -21,7 +21,7 @@ import com.g3.launcher.g3_laucher.generated.resources.ic_translate
 import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.LocalConfig
-import com.g3.launcher.presentation.extension.hoverEffect
+import com.g3.launcher.ui.extension.hoverEffect
 import com.g3.launcher.ui.theme.ColorOrange
 import org.jetbrains.compose.resources.painterResource
 

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import com.g3.launcher.presentation.extension.hoverEffect
+import com.g3.launcher.ui.extension.hoverEffect
 import com.g3.launcher.ui.theme.ColorOrange
 import com.g3.launcher.ui.theme.ColorText
 import com.g3.launcher.ui.theme.Fonts

@@ -24,7 +24,7 @@ import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.InstallPackages
 import com.g3.launcher.model.LocalConfig
 import com.g3.launcher.model.LocalLanguage
-import com.g3.launcher.presentation.extension.hoverEffect
+import com.g3.launcher.ui.extension.hoverEffect
 import com.g3.launcher.ui.component.G3Text
 import com.g3.launcher.ui.theme.ColorOrange
 import com.g3.launcher.ui.theme.ColorTextGray

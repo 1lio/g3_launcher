@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.g3.launcher.g3_laucher.generated.resources.Res
 import com.g3.launcher.g3_laucher.generated.resources.ic_close
-import com.g3.launcher.presentation.extension.hoverEffect
+import com.g3.launcher.ui.extension.hoverEffect
 import com.g3.launcher.ui.theme.ColorOrange
 import org.jetbrains.compose.resources.painterResource
 

@@ -60,17 +60,18 @@ fun ApplicationScope.InstallPane(
                 onClick = viewModel::installPackages
             )
 
+            is Stage.SelectDirs -> DirectorySelectPane(
+                gameDir = stage.gameDir,
+                gameDirError = stage.gameDirError,
+                gameSavesDir = stage.saveDir,
+                gameSaveError = stage.saveDirErrorPath,
+                onClickGameDir = viewModel::selectGameDir,
+                onClickSavesDir = viewModel::selectGameSaveDir,
+                onClickNext = viewModel::continueInstall,
+            )
+
             else -> {}
             /*
-                        is Stage.SelectDirs -> DirectorySelectPane(
-                            gameDir = stage.gameDir,
-                            gameDirError = stage.gameDirError,
-                            gameSavesDir = stage.saveDir,
-                            gameSaveError = stage.saveDirErrorPath,
-                            onClickGameDir = viewModel::selectGameDir,
-                            onClickSavesDir = viewModel::selectGameSaveDir,
-                            onClickNext = viewModel::continueInstall,
-                        )
 
                         is Stage.Setup -> InstallationPane(
                             progress = viewModel.progress,

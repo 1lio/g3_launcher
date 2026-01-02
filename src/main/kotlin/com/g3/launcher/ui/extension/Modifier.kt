@@ -1,4 +1,4 @@
-package com.g3.launcher.presentation.extension
+package com.g3.launcher.ui.extension
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed

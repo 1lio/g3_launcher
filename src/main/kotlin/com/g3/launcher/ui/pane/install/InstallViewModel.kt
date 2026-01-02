@@ -8,10 +8,13 @@ import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.manager.PackagesManager
 import com.g3.launcher.mapper.toLocales
 import com.g3.launcher.model.InstallPackages
+import com.g3.launcher.model.LauncherConfig
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.File
+import javax.swing.JFileChooser
 
 class InstallViewModel {
     sealed interface Stage {
@@ -27,7 +30,7 @@ class InstallViewModel {
         ) : Stage
 
         class Setup(
-            val step: Int,
+            val step: Int = 1,
             val num: Int = 1,
             val count: Int = 64,
             val closeEnabled: Boolean = true
@@ -42,8 +45,8 @@ class InstallViewModel {
     data class DownloadState(
         val isBaseDownloading: Boolean = false,
         val baseComplete: Boolean = false,
-        val languageDownloads: Map<String, Boolean> = emptyMap(), // язык -> завершено
-        val activeLanguageDownloads: Set<String> = emptySet() // текущие загрузки
+        val languageDownloads: Map<String, Boolean> = emptyMap(),
+        val activeLanguageDownloads: Set<String> = emptySet()
     )
 
     private val _downloadState = MutableStateFlow(DownloadState())
@@ -71,9 +74,9 @@ class InstallViewModel {
         private set
 
     private var baseDownloadJob: Job? = null
-    private val languageDownloadJobs = mutableMapOf<String, Job>()
-
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val config: LauncherConfig = LauncherManager.config
 
     fun runInstall() {
         stage = Stage.PackSelect
@@ -112,10 +115,11 @@ class InstallViewModel {
     }
 
     fun installPackages(installPackage: InstallPackages) {
+        stage = Stage.SelectDirs()
+
         val locales = installPackage.toLocales()
         println("Starting language downloads: $locales")
 
-        // Используйте coroutineScope для параллельного выполнения
         scope.launch {
             val results = PackagesManager.installMultipleLanguages(locales) { language, progress ->
                 when (language) {
@@ -127,7 +131,6 @@ class InstallViewModel {
                 }
                 println("$language : $progress%")
 
-                // Обновляем состояние загрузки
                 if (progress == 100) {
                     _downloadState.value = _downloadState.value.copy(
                         activeLanguageDownloads = _downloadState.value.activeLanguageDownloads - language,
@@ -140,8 +143,103 @@ class InstallViewModel {
                 }
             }
 
-            // Все загрузки завершены
             println("Все языковые пакеты загружены: $results")
         }
+    }
+
+    // =======
+
+    fun selectGameDir() {
+        val containsFile = "Gothic3.exe"
+        val currentPath = openDirectoryChooserSwing(
+            initialDirectory = config.gameDirPath?.let { File(it) }
+        )?.path
+
+        if (currentPath != null) {
+            val file = File("$currentPath\\$containsFile")
+            if (!file.exists()) {
+                stage = Stage.SelectDirs(
+                    gameDir = null,
+                    gameDirError = containsFile,
+                    saveDir = LauncherManager.config.gameSaveDirPath,
+                    saveDirErrorPath = null
+                )
+            } else {
+                LauncherManager.updateConfig { copy(gameDirPath = currentPath) }
+
+                stage = Stage.SelectDirs(
+                    gameDir = LauncherManager.config.gameDirPath,
+                    gameDirError = null,
+                    saveDir = LauncherManager.config.gameSaveDirPath,
+                    saveDirErrorPath = null
+                )
+            }
+        }
+    }
+
+    fun selectGameSaveDir() {
+        val containsFile = "UserOptions.ini"
+        val currentPath = openDirectoryChooserSwing(
+            initialDirectory = config.gameSaveDirPath?.let { File(it) }
+        )?.path
+
+        if (currentPath != null) {
+            val file = File("$currentPath\\$containsFile")
+            if (!file.exists()) {
+                stage = Stage.SelectDirs(
+                    gameDir = LauncherManager.config.gameDirPath,
+                    gameDirError = null,
+                    saveDir = null,
+                    saveDirErrorPath = containsFile
+                )
+            } else {
+                LauncherManager.updateConfig { copy(gameSaveDirPath = currentPath) }
+
+                stage = Stage.SelectDirs(
+                    gameDir = LauncherManager.config.gameDirPath,
+                    gameDirError = null,
+                    saveDir = LauncherManager.config.gameSaveDirPath,
+                    saveDirErrorPath = null
+                )
+            }
+        }
+    }
+
+    private fun openDirectoryChooserSwing(
+        initialDirectory: File? = null
+    ): File? {
+        val fileChooser = JFileChooser()
+        fileChooser.dialogTitle = LauncherManager.config.language.strings.selectDirectory
+        fileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        initialDirectory?.let { dir ->
+            if (dir.exists()) {
+                fileChooser.currentDirectory = dir
+            }
+        }
+
+        val result = fileChooser.showOpenDialog(null)
+        return when (result) {
+            JFileChooser.APPROVE_OPTION -> {
+                fileChooser.selectedFile
+            }
+
+            JFileChooser.CANCEL_OPTION -> {
+                return initialDirectory
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
+
+    //
+
+    fun continueInstall() {
+        stage = Stage.Setup()
+    }
+
+    private suspend fun installBasePackage() {
+
     }
 }
