@@ -92,7 +92,7 @@ class InstallViewModel {
     private fun startBaseDownload() {
         scope.launch {
             try {
-                if (config.packages.contains("base")) {
+                if (PackagesManager.verify("base")) {
                     baseDownloadComplete = true
                     baseProgress = 100
                     downloadProgressMap["base"] = 100
@@ -138,7 +138,7 @@ class InstallViewModel {
         // Загружаем английскую локализацию по умолчанию
         scope.launch {
             try {
-                if (config.packages.contains("en")) {
+                if (PackagesManager.verify("en")) {
                     downloadProgressMap["en"] = 100
 
                     updateDownloadProgress()
@@ -202,7 +202,7 @@ class InstallViewModel {
     private fun startLocalizationDownload(locale: String) {
         scope.launch {
             try {
-                if (config.packages.contains(locale)) {
+                if (PackagesManager.verify(locale)) {
                     downloadCompleteMap[locale] = true
                     downloadProgressMap[locale] = 100
 
@@ -246,6 +246,8 @@ class InstallViewModel {
         stage = Stage.Setup(
             steps = buildSetupSteps()
         )
+
+        startDefaultLocalizationDownload()
 
         // Проверяем, можно ли начинать установку
         checkAndStartInstallation()

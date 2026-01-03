@@ -47,5 +47,15 @@ class HuLocalization : Localization {
     override val fpsLimit60Description: String = "Beállítja a képfrissítési frekvenciát 60 fps-re. A függőleges szinkronizálás bekapcsol"
     override val drawDistance: String = "Rajzolási távolság"
     override val additionalLocalizationPackage: String = "További lokalizációs csomag"
+    override val patchesLoading: String = "Javítások betöltése"
+    override val localizationFilesLoading: String = "Honosítási fájlok betöltése"
+    override val patchesInstallation: String = "Javítások telepítése"
+    override val localizationInstallation: String = "Honosítás telepítése"
+    override val patchedGameFilesLoading: String = "Javított játékfájlok betöltése"
+    override val cleanupObsoleteFiles: String = "Elavult fájlok, hivatkozások és változtatási fájlok eltávolítása"
+    override val archiveReassembly: String = "Az összes fő archívumrész egyesítve lett. Az archívumok újra lettek építve"
+    override val voiceFilesCopying: String = "Hangfájlok másolása a játék könyvtárába. Alapértelmezés szerint az angol nyelv van kiválasztva"
+    override val saveBackup: String = "Mentések biztonsági mentése a telepítés időpontjában"
+    override val localizationFilesLoadingNote: String = "Megjegyzés: A játék indítása során csak 1 Speech fájlnak kell aktívnak lennie. Ha indító nélkül játszik, távolítsa el a ; jelet a kívánt hangfájl előtt az Ini/mountlist.ini fájlban"
 
 }

@@ -131,22 +131,6 @@ object PackagesManager {
         }
     }
 
-    suspend fun installMultipleLanguages(
-        languages: List<String>,
-        onProgress: (String, Int) -> Unit = { _, _ -> }
-    ): Map<String, Int> {
-        return coroutineScope {
-            languages.map { language ->
-                async {
-                    val result = installLanguagePackage(language) { progress ->
-                        onProgress(language, progress)
-                    }
-                    language to result
-                }
-            }.awaitAll().toMap()
-        }
-    }
-
     /**
      * Улучшенная загрузка больших файлов с поддержкой возобновления
      */
@@ -230,10 +214,30 @@ object PackagesManager {
         }
     }
 
+    suspend fun verify(arch: String): Boolean {
+        if (!LauncherManager.config.packages.contains(arch)) {
+            return false
+        }
+
+        val url = "$BASE_URL/${arch}.zip"
+        val size = getFileSize(url)
+        val filePath = when (arch) {
+            "base" -> BASE_PATH
+            "en" -> EN_PATH
+            "de" -> DE_PATH
+            "fr" -> FR_PATH
+            "pl" -> PL_PATH
+            "ru" -> RU_PATH
+            else -> return false
+        }
+
+        return verifyFileIntegrity(filePath, size)
+    }
+
     /**
      * Проверяет целостность скачанного файла
      */
-    suspend fun verifyFileIntegrity(filePath: String, expectedSize: Long? = null): Boolean {
+    fun verifyFileIntegrity(filePath: String, expectedSize: Long? = null): Boolean {
         return try {
             val file = File(filePath)
             if (!file.exists()) return false
@@ -243,7 +247,7 @@ object PackagesManager {
                 return false
             }
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

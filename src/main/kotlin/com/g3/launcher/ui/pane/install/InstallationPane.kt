@@ -3,8 +3,11 @@ package com.g3.launcher.ui.pane.install
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,12 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g3.launcher.Constants
 import com.g3.launcher.g3_laucher.generated.resources.Res
 import com.g3.launcher.g3_laucher.generated.resources.ic_ok
 import com.g3.launcher.model.LocalLanguage
@@ -124,12 +130,32 @@ fun BoxScope.InstallationPane(
             steps.forEach {
                 Step(
                     title = when (it) {
-                        is InstallViewModel.SetupStep.BaseDownload -> "Загрузка патчей"
-                        is InstallViewModel.SetupStep.LocalizationDownload -> "Загрузка локализации (${it.count}/${it.total})"
-                        is InstallViewModel.SetupStep.CleanGameDir -> "Очистка файлов игры"
-                        is InstallViewModel.SetupStep.BaseInstall -> "Установка патчей"
-                        is InstallViewModel.SetupStep.LocalizationInstall -> "Установка локализации (${it.count}/${it.total})"
-                        is InstallViewModel.SetupStep.CreateBackup -> "Бекап сохранений"
+                        is InstallViewModel.SetupStep.BaseDownload -> strings.patchesLoading
+                        is InstallViewModel.SetupStep.LocalizationDownload -> "${strings.localizationFilesLoading} (${it.count}/${it.total})"
+                        is InstallViewModel.SetupStep.CleanGameDir -> strings.removingOutdatedFiles
+                        is InstallViewModel.SetupStep.BaseInstall -> strings.patchesInstallation
+                        is InstallViewModel.SetupStep.LocalizationInstall -> "${strings.localizationInstallation} (${it.count}/${it.total})"
+                        is InstallViewModel.SetupStep.CreateBackup -> strings.backupSaves
+                    },
+                    description = when (it) {
+                        is InstallViewModel.SetupStep.BaseDownload -> strings.patchedGameFilesLoading
+                        is InstallViewModel.SetupStep.LocalizationDownload -> """
+                            ${strings.localizationFilesLoading}:
+                            
+                            ${strings.localizationFilesLoadingNote}
+                        """.trimIndent()
+                        is InstallViewModel.SetupStep.CleanGameDir -> strings.cleanupObsoleteFiles
+                        is InstallViewModel.SetupStep.BaseInstall -> """
+                            ${strings.patchesInstallation}:
+                            
+                               * ${Constants.CPT_PATCH}
+                               * ${Constants.UPDATE_PACK}
+                               * ${Constants.PARU}
+                          
+                            ${strings.archiveReassembly}
+                        """.trimIndent()
+                        is InstallViewModel.SetupStep.LocalizationInstall -> strings.voiceFilesCopying
+                        is InstallViewModel.SetupStep.CreateBackup -> strings.saveBackup
                     },
                     progress = when (it) {
                         is InstallViewModel.SetupStep.BaseDownload -> it.progress
@@ -145,17 +171,41 @@ fun BoxScope.InstallationPane(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Step(title: String, progress: Int) {
+private fun Step(title: String, description: String, progress: Int) {
+    val color = if (progress == 100) ColorTextGray else ColorText
+    val tooltipShape = RoundedCornerShape(8.dp)
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        G3Text(
-            text = title,
-            color = if (progress == 100) ColorTextGray else ColorText,
-            fontSize = 14.sp
-        )
+        TooltipArea(
+            tooltip = {
+                Box(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .width(300.dp)
+                        .background(Color.Black, tooltipShape)
+                        .border(1.dp, ColorOrange, tooltipShape)
+                        .padding(start = 8.dp, top = 4.dp, end = 8.dp, bottom = 8.dp)
+                ) {
+                    G3Text(
+                        text = description,
+                        textAlign = TextAlign.Start,
+                        color = ColorText,
+                        fontSize = 12.sp
+                    )
+                }
+            },
+        ) {
+            G3Text(
+                text = title,
+                textAlign = TextAlign.Start,
+                color = color,
+                fontSize = 14.sp,
+            )
+        }
 
         if (progress == 100) {
             Image(

@@ -16,6 +16,16 @@ interface Localization {
     val removingOutdatedFiles: String
     val backupSaves: String
     val installationError: String
+    val patchesLoading: String
+    val localizationFilesLoading: String
+    val patchesInstallation: String
+    val localizationInstallation: String
+    val patchedGameFilesLoading: String
+    val cleanupObsoleteFiles: String
+    val archiveReassembly: String
+    val voiceFilesCopying: String
+    val saveBackup: String
+    val localizationFilesLoadingNote: String
 
     val play: String
     val playMods: String
