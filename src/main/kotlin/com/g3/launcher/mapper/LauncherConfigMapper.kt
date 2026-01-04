@@ -1,5 +1,6 @@
 package com.g3.launcher.mapper
 
+import com.g3.launcher.Constants
 import com.g3.launcher.entity.LauncherConfigJson
 import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.LauncherConfig
@@ -20,6 +21,7 @@ fun LauncherConfigJson.toConfig(
 
 fun LauncherConfig.toJson(): LauncherConfigJson {
     return LauncherConfigJson(
+        version = Constants.LAUNCHER_VERSION,
         installed = installed,
         language = language.key,
         mods = mods,
