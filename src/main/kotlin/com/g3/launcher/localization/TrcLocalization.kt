@@ -57,4 +57,6 @@ class TrcLocalization : Localization {
     override val voiceFilesCopying: String = "將語音文件複製到遊戲目錄。默認選擇英語"
     override val saveBackup: String = "安裝時備份保存"
     override val localizationFilesLoadingNote: String = "注意：遊戲啟動期間，只能有1個Speech文件處於活動狀態。不使用啟動器玩遊戲時，請刪除Ini/mountlist.ini中所需語音文件前的;"
+    override val download: String = "下載"
+    override val resume: String = "繼續"
 }

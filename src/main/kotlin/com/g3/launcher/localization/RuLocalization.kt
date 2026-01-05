@@ -57,4 +57,6 @@ class RuLocalization : Localization {
     override val voiceFilesCopying: String = "Копирование файлов озвучки в директорию с игрой. По умолчанию выбран английский язык"
     override val saveBackup: String = "Бекап сохранений на момент установки"
     override val localizationFilesLoadingNote: String = "Обратите внимание: во время запуска игры должен быть активен только 1 Speech файл. При игре без лаунчера уберите ; перед файлом нужной озвучки в файле Ini/mountlist.ini"
+    override val download: String = "Загрузить"
+    override val resume: String = "Продолжить"
 }

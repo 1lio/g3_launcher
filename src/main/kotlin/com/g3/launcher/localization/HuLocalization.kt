@@ -57,5 +57,7 @@ class HuLocalization : Localization {
     override val voiceFilesCopying: String = "Hangfájlok másolása a játék könyvtárába. Alapértelmezés szerint az angol nyelv van kiválasztva"
     override val saveBackup: String = "Mentések biztonsági mentése a telepítés időpontjában"
     override val localizationFilesLoadingNote: String = "Megjegyzés: A játék indítása során csak 1 Speech fájlnak kell aktívnak lennie. Ha indító nélkül játszik, távolítsa el a ; jelet a kívánt hangfájl előtt az Ini/mountlist.ini fájlban"
+    override val download: String = "Letöltés"
+    override val resume: String = "Folytatás"
 
 }

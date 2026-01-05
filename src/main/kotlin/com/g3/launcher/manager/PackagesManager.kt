@@ -2,6 +2,9 @@ package com.g3.launcher.manager
 
 import com.g3.launcher.Constants.LAUNCHER_VERSION
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
@@ -14,6 +17,12 @@ import kotlin.math.roundToInt
  * Работа с пакетами установки
  */
 object PackagesManager {
+    data class DownloadState(
+        val key: String,
+        val progress: Int,
+        val isRunning: Boolean
+    )
+
     private const val BASE_URL = "https://github.com/1lio/g3_launcher/releases/download/$LAUNCHER_VERSION"
 
     private const val BASE_PATH: String = "app/resources/base.zip"
@@ -28,6 +37,70 @@ object PackagesManager {
     // Отдельные мьютексы для каждого типа файлов
     private val baseMutex = Mutex()
     private val languageMutexes = mutableMapOf<String, Mutex>() // Язык -> Mutex
+
+    private val downloadJobs = mutableMapOf<String, Job>()
+    private val downloadCallbacks = mutableMapOf<String, MutableList<(Int) -> Unit>>()
+
+    fun startLanguageDownload(language: String, onProgress: (Int) -> Unit) {
+        val callbacks = downloadCallbacks.getOrPut(language) { mutableListOf() }
+        callbacks.add(onProgress)
+
+        // Если загрузка уже идёт → просто добавили колбек, не создаём новый Job
+        if (downloadJobs[language]?.isActive == true) return
+
+        val job = scope.launch {
+            installLanguagePackage(language) { progress ->
+                // уведомляем всех подписчиков
+                downloadCallbacks[language]?.forEach { it(progress) }
+            }
+
+            // по завершении
+            downloadCallbacks[language]?.forEach { it(100) }
+            downloadJobs.remove(language)
+            downloadCallbacks.remove(language)
+        }
+
+        downloadJobs[language] = job
+    }
+
+    fun stopDownload(language: String) {
+        downloadJobs[language]?.cancel()
+        downloadJobs.remove(language)
+        downloadCallbacks.remove(language)
+    }
+
+    fun getLocalProgress(language: String): Int {
+        val path = when (language) {
+            "en" -> EN_PATH
+            "de" -> DE_PATH
+            "fr" -> FR_PATH
+            "pl" -> PL_PATH
+            "ru" -> RU_PATH
+            else -> return 0
+        }
+
+        val file = File(path)
+        if (!file.exists()) return 0
+
+        val total = runBlocking { getFileSize("$BASE_URL/$language.zip") } ?: return 0
+        if (total == 0L) return 0
+
+        return ((file.length().toFloat() / total) * 100).toInt().coerceIn(0, 99)
+    }
+
+    fun isDownloading(language: String): Boolean {
+        return downloadJobs[language]?.isActive == true
+    }
+
+    fun resumeIfNeeded(language: String, onProgress: (Int) -> Unit) {
+        if (isDownloading(language)) return
+
+        val progress = getLocalProgress(language)
+        if (progress in 1..99) {
+            println("Resuming download for $language ($progress%)")
+            startLanguageDownload(language, onProgress)
+        }
+    }
 
     fun getAvailablePackages(): List<String> {
         val list = mutableListOf<String>()
@@ -161,32 +234,36 @@ object PackagesManager {
             throw Exception("HTTP ошибка: ${connection.responseCode}")
         }
 
-        RandomAccessFile(targetFile, "rw").use { raf ->
-            raf.seek(downloadedBytes)
+        try {
+            RandomAccessFile(targetFile, "rw").use { raf ->
+                raf.seek(downloadedBytes)
 
-            connection.inputStream.use { input ->
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
-                var lastProgress = -1
+                connection.inputStream.use { input ->
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+                    var lastProgress = -1
 
-                while (input.read(buffer).also { bytesRead = it } != -1) {
-                    raf.write(buffer, 0, bytesRead)
-                    downloadedBytes += bytesRead
+                    while (true) {
+                        currentCoroutineContext().ensureActive()
 
-                    if (totalBytes != null) {
-                        val progress = (downloadedBytes.toFloat() / totalBytes * 100).roundToInt()
-                        if (progress != lastProgress) {
-                            onProgress(progress)
-                            lastProgress = progress
+                        val read = input.read(buffer)
+                        if (read == -1) break
+
+                        raf.write(buffer, 0, read)
+                        downloadedBytes += read
+
+                        if (totalBytes != null) {
+                            val progress = (downloadedBytes.toFloat() / totalBytes * 100).roundToInt()
+                            if (progress != lastProgress) {
+                                onProgress(progress)
+                                lastProgress = progress
+                            }
                         }
-                    }
-
-                    // Периодически сохраняем прогресс
-                    if (downloadedBytes % (10 * 1024 * 1024) == 0L) { // Каждые 10 MB
-                        println("Загружено: ${downloadedBytes / 1024 / 1024} MB")
                     }
                 }
             }
+        } finally {
+            connection.disconnect()
         }
 
         connection.disconnect()
@@ -255,5 +332,29 @@ object PackagesManager {
     fun dispose() {
         scope.cancel()
         languageMutexes.clear()
+    }
+
+    fun getLocalBytes(language: String): Long {
+        val path = when (language) {
+            "en" -> EN_PATH
+            "de" -> DE_PATH
+            "fr" -> FR_PATH
+            "pl" -> PL_PATH
+            "ru" -> RU_PATH
+            else -> return 0L
+        }
+
+        val file = File(path)
+        return if (file.exists()) file.length() else 0L
+    }
+
+    suspend fun calculateProgress(language: String): Int {
+        val bytes = getLocalBytes(language)
+        if (bytes == 0L) return 0
+
+        val total = getFileSize("$BASE_URL/$language.zip") ?: return 0
+        return ((bytes.toFloat() / total) * 100)
+            .toInt()
+            .coerceIn(0, 99)
     }
 }

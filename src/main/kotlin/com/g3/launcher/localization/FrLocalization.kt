@@ -57,4 +57,6 @@ class FrLocalization : Localization {
     override val voiceFilesCopying: String = "Copie des fichiers vocaux dans le répertoire du jeu. Langue anglaise sélectionnée par défaut"
     override val saveBackup: String = "Sauvegarde des sauvegardes au moment de l'installation"
     override val localizationFilesLoadingNote: String = "Remarque : lors du lancement du jeu, seul 1 fichier Speech doit être actif. Lorsque vous jouez sans lanceur, supprimez le ; avant le fichier vocal souhaité dans Ini/mountlist.ini"
+    override val download: String = "Télécharger"
+    override val resume: String = "Reprendre"
 }

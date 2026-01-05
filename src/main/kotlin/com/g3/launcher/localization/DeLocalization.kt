@@ -57,4 +57,6 @@ class DeLocalization : Localization {
     override val voiceFilesCopying: String = "Kopieren von Sprachdateien ins Spielverzeichnis. Standardmäßig ist Englisch ausgewählt"
     override val saveBackup: String = "Sicherung der Spielstände zum Zeitpunkt der Installation"
     override val localizationFilesLoadingNote: String = "Hinweis: Während des Spielstarts sollte nur 1 Speech-Datei aktiv sein. Wenn Sie ohne Launcher spielen, entfernen Sie das ; vor der gewünschten Sprachdatei in Ini/mountlist.ini"
+    override val download: String = "Herunterladen"
+    override val resume: String = "Fortsetzen"
 }

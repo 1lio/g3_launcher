@@ -57,4 +57,6 @@ class EnLocalization : Localization {
     override val voiceFilesCopying: String = "Copying voice files to the game directory. English language selected by default"
     override val saveBackup: String = "Backing up saves at the time of installation"
     override val localizationFilesLoadingNote: String = "Note: During game launch, only 1 Speech file should be active. When playing without a launcher, remove the ; before the desired voice file in Ini/mountlist.ini"
+    override val download: String = "Download"
+    override val resume: String = "Resume"
 }

@@ -35,6 +35,7 @@ fun G3Text(
     lineHeight: TextUnit = TextUnit.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
+    hoverSize: Float = 8f,
     modifier: Modifier = Modifier,
 ) {
     var isEnabled by remember { mutableStateOf(enabled) }
@@ -59,7 +60,7 @@ fun G3Text(
             shadow = Shadow(
                 color = hoverColor,
                 offset = Offset(0f, 0f),
-                blurRadius = 8f
+                blurRadius = hoverSize
             )
         )
     } else {

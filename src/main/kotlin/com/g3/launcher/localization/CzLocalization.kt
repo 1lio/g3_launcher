@@ -57,4 +57,6 @@ class CzLocalization : Localization {
     override val voiceFilesCopying: String = "Kopírování hlasových souborů do herního adresáře. Angličtina vybrána jako výchozí jazyk"
     override val saveBackup: String = "Zálohování uložení v době instalace"
     override val localizationFilesLoadingNote: String = "Poznámka: Během spuštění hry by měl být aktivní pouze 1 Speech soubor. Při hraní bez spouštěče odstraňte ; před požadovaným hlasovým souborem v Ini/mountlist.ini"
+    override val download: String = "Stáhnout"
+    override val resume: String = "Pokračovat"
 }

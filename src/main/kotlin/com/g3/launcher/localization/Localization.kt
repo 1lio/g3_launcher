@@ -67,4 +67,7 @@ interface Localization {
 
     val additionalLocalizationPackage: String
 
+    val download: String
+    val resume: String
+
 }

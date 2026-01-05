@@ -57,4 +57,6 @@ class EsLocalization : Localization {
     override val voiceFilesCopying: String = "Copiando archivos de voz al directorio del juego. Idioma inglés seleccionado por defecto"
     override val saveBackup: String = "Haciendo copia de seguridad de las partidas guardadas en el momento de la instalación"
     override val localizationFilesLoadingNote: String = "Nota: Durante el inicio del juego, solo debe estar activo 1 archivo Speech. Al jugar sin lanzador, elimine el ; antes del archivo de voz deseado en Ini/mountlist.ini"
+    override val download: String = "Descargar"
+    override val resume: String = "Reanudar"
 }

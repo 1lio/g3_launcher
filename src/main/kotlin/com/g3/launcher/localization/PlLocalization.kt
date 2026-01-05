@@ -57,4 +57,6 @@ class PlLocalization : Localization {
     override val voiceFilesCopying: String = "Kopiowanie plików głosowych do katalogu gry. Domyślnie wybrany język angielski"
     override val saveBackup: String = "Tworzenie kopii zapasowej zapisów w momencie instalacji"
     override val localizationFilesLoadingNote: String = "Uwaga: Podczas uruchamiania gry aktywny powinien być tylko 1 plik Speech. Podczas gry bez launchera usuń ; przed żądanym plikiem głosowym w pliku Ini/mountlist.ini"
+    override val download: String = "Pobierz"
+    override val resume: String = "Wznów"
 }

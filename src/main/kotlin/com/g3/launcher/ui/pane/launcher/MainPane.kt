@@ -69,7 +69,7 @@ fun ApplicationScope.MainPane(
                     color = if (viewModel.gameStarted) ColorTextSecondary else ColorText,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(enabled = !viewModel.gameStarted) {
+                        .clickable(null, null, enabled = !viewModel.gameStarted) {
                             viewModel.playGame()
                         }
                 )
@@ -84,7 +84,7 @@ fun ApplicationScope.MainPane(
                         fontWeight = FontWeight.Normal,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(enabled = !viewModel.gameStarted) {
+                            .clickable(null, null, enabled = !viewModel.gameStarted) {
                                 viewModel.playWithMods()
                             }
                     )
@@ -106,7 +106,7 @@ fun ApplicationScope.MainPane(
                     fontSize = 24.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .clickable(null, null) {
                             WindowManager.showOptions {
                                 showOption = true
                             }

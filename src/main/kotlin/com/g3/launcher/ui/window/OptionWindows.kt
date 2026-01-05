@@ -21,6 +21,7 @@ import com.g3.launcher.manager.WindowManager
 import com.g3.launcher.ui.component.BgPosition
 import com.g3.launcher.ui.component.MainBox
 import com.g3.launcher.ui.component.option.OptionTabSelector
+import com.g3.launcher.ui.pane.option.language.OptionLanguagePane
 
 @Composable
 fun ApplicationScope.OptionWindows(
@@ -52,6 +53,7 @@ fun ApplicationScope.OptionWindows(
                         .fillMaxSize()
                 ) {
                     when (tabIndex) {
+                        0 -> OptionLanguagePane()
                         else -> {}
                     }
                 }
