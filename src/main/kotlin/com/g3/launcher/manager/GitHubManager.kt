@@ -35,7 +35,7 @@ object GitHubManager {
         val size: Long = 0
     )
 
-    private const val BASE_URL = "https://api.github.com/repos/1lio/g3_laucher/releases/latest"
+    private const val BASE_URL = "https://api.github.com/repos/1lio/g3_launcher/releases/latest"
 
     suspend fun isNewVersionAvailable(): Boolean {
         return try {
