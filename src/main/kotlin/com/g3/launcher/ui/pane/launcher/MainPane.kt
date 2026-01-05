@@ -1,7 +1,15 @@
 package com.g3.launcher.ui.pane.launcher
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.Divider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ApplicationScope
 import com.g3.launcher.g3_laucher.generated.resources.Res
 import com.g3.launcher.g3_laucher.generated.resources.bg5
-import com.g3.launcher.manager.SteamManager
+import com.g3.launcher.g3_laucher.generated.resources.headline_line
 import com.g3.launcher.manager.WindowManager
 import com.g3.launcher.model.LocalConfig
 import com.g3.launcher.model.LocalLanguage
@@ -20,45 +28,19 @@ import com.g3.launcher.ui.component.G3Text
 import com.g3.launcher.ui.component.LanguageButton
 import com.g3.launcher.ui.component.MainBox
 import com.g3.launcher.ui.component.UpdateButton
-import com.g3.launcher.ui.theme.ColorTextGray
-import com.g3.launcher.ui.window.onActiveWindow
-import kotlinx.coroutines.delay
+import com.g3.launcher.ui.theme.ColorText
+import com.g3.launcher.ui.theme.ColorTextSecondary
+import com.g3.launcher.ui.window.OptionWindows
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ApplicationScope.MainPane(
     viewModel: MainViewModel = remember { MainViewModel() },
     onClose: () -> Unit = ::exitApplication,
 ) {
-    LaunchedEffect(Unit) {
-        WindowManager.mainWindow?.onActiveWindow {
-            viewModel.checkGameState(isActiveLauncher = it)
-        }
-    }
-
-    var isActiveWindow by remember { mutableStateOf(true) }
     val strings = LocalLanguage.current.strings
     val config = LocalConfig.current
-
-    var isStarted by remember { mutableStateOf(false) }
-    var start by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isActiveWindow && start) {
-        if (start) {
-            isStarted = true
-
-            WindowManager.optionsWindow = null
-
-            delay(5000)
-
-            if (isActiveWindow) {
-                isStarted = SteamManager.isGameProcessRunning()
-
-                if (!isStarted) {
-                    start = false
-                }
-            }
-        }
-    }
+    var showOption by remember { mutableStateOf(false) }
 
     MainBox(
         backgroundRes = Res.drawable.bg5,
@@ -78,34 +60,62 @@ fun ApplicationScope.MainPane(
                     .width(320.dp)
                     .wrapContentHeight()
             ) {
-                if (!isStarted) {
+                G3Text(
+                    text = strings.play,
+                    textAlign = TextAlign.Center,
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Bold,
+                    hoverable = !viewModel.gameStarted,
+                    color = if (viewModel.gameStarted) ColorTextSecondary else ColorText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = !viewModel.gameStarted) {
+                            viewModel.playGame()
+                        }
+                )
+
+                if (config.mods) {
                     G3Text(
-                        text = strings.play,
+                        text = strings.playMods,
+                        hoverable = !viewModel.gameStarted,
                         textAlign = TextAlign.Center,
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        hoverable = true,
+                        fontSize = 22.sp,
+                        color = if (viewModel.gameStarted) ColorTextSecondary else ColorText,
+                        fontWeight = FontWeight.Normal,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                viewModel.playGame()
-                                SteamManager.startGame()
-                                start = true
+                            .clickable(enabled = !viewModel.gameStarted) {
+                                viewModel.playWithMods()
                             }
                     )
-                } else {
-                    G3Text(
-                        text = strings.play,
-                        color = ColorTextGray,
-                        textAlign = TextAlign.Center,
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        hoverable = false,
-                        shadow = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
+
+                Image(
+                    painter = painterResource(Res.drawable.headline_line),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(14.dp)
+                        .fillMaxWidth()
+                )
+
+                G3Text(
+                    text = strings.options,
+                    textAlign = TextAlign.Center,
+                    color = if (viewModel.gameStarted) ColorTextSecondary else ColorText,
+                    hoverable = !viewModel.gameStarted,
+                    fontSize = 24.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            WindowManager.showOptions {
+                                showOption = true
+                            }
+                        }
+
+                )
             }
+
+            Divider(modifier = Modifier.height(24.dp))
         }
 
         if (config.availableUpdate) {
@@ -121,5 +131,11 @@ fun ApplicationScope.MainPane(
                 .align(alignment = Alignment.BottomStart)
                 .padding(24.dp)
         )
+
+        if (showOption) {
+            OptionWindows {
+                showOption = false
+            }
+        }
     }
 }

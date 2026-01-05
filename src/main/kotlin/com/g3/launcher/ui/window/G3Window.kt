@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
@@ -28,8 +27,6 @@ import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.awt.geom.RoundRectangle2D
 import kotlin.math.min
 
@@ -45,8 +42,12 @@ fun ApplicationScope.G3Window(
         size = getPreferredWindowSize(width, height)
     )
     var windowRef by remember { mutableStateOf<Window?>(null) }
+
     val density = LocalDensity.current
-    val cornerRadiusPx = with(density) { 8.dp.toPx() }
+    val cornerRadiusDp = 8.dp
+    val cornerRadiusPx = with(density) { cornerRadiusDp.toPx() * 2 }
+
+    val shape = RoundedCornerShape(cornerRadiusDp)
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -55,14 +56,14 @@ fun ApplicationScope.G3Window(
         icon = painterResource(Res.drawable.logo),
         resizable = false,
         undecorated = true,
-        transparent = true,
+        transparent = false,
         onPreviewKeyEvent = { false }
     ) {
         windowRef = this.window
+
         Surface(
-            color = Color.Transparent,
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
+            color = Color.Black,
+            shape = shape,
         ) {
             content()
         }
@@ -70,35 +71,14 @@ fun ApplicationScope.G3Window(
 
     LaunchedEffect(windowRef, cornerRadiusPx) {
         val win = windowRef ?: return@LaunchedEffect
+
         win.shape = RoundRectangle2D.Float(
             0f, 0f,
             win.width.toFloat(), win.height.toFloat(),
-            cornerRadiusPx * 2, cornerRadiusPx * 2
+            cornerRadiusPx, cornerRadiusPx
         )
-        var mouseDownPoint: Point? = null
-        var initialWindowPoint: Point? = null
-        win.addMouseListener(object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent) {
-                mouseDownPoint = e.locationOnScreen
-                initialWindowPoint = win.locationOnScreen
-            }
 
-            override fun mouseReleased(e: MouseEvent) {
-                mouseDownPoint = null
-                initialWindowPoint = null
-            }
-        })
-        win.addMouseMotionListener(object : MouseMotionAdapter() {
-            override fun mouseDragged(e: MouseEvent) {
-                val origin = mouseDownPoint ?: return
-                val initialWin = initialWindowPoint ?: return
-                val dx = e.locationOnScreen.x - origin.x
-                val dy = e.locationOnScreen.y - origin.y
-                val newX = initialWin.x + dx
-                val newY = initialWin.y + dy
-                win.setLocation(newX, newY)
-            }
-        })
+        setupWindowDragging(win)
     }
 }
 
@@ -109,20 +89,31 @@ private fun getPreferredWindowSize(preferredW: Int, preferredH: Int): DpSize {
     return DpSize(w.dp, h.dp)
 }
 
-private var windowAdapter: WindowAdapter? = null
+private fun setupWindowDragging(window: Window) {
+    var mouseDownPoint: Point? = null
+    var initialWindowPoint: Point? = null
 
-fun Window.onActiveWindow(onActive: (Boolean) -> Unit) {
-    removeWindowListener(windowAdapter)
-
-    windowAdapter = object : WindowAdapter() {
-        override fun windowActivated(e: WindowEvent?) {
-            onActive(true)
+    window.addMouseListener(object : MouseAdapter() {
+        override fun mousePressed(e: MouseEvent) {
+            mouseDownPoint = e.locationOnScreen
+            initialWindowPoint = window.locationOnScreen
         }
 
-        override fun windowDeactivated(e: WindowEvent?) {
-            onActive(false)
+        override fun mouseReleased(e: MouseEvent) {
+            mouseDownPoint = null
+            initialWindowPoint = null
         }
-    }
+    })
 
-    addWindowListener(windowAdapter)
+    window.addMouseMotionListener(object : MouseMotionAdapter() {
+        override fun mouseDragged(e: MouseEvent) {
+            val origin = mouseDownPoint ?: return
+            val initialWin = initialWindowPoint ?: return
+            val dx = e.locationOnScreen.x - origin.x
+            val dy = e.locationOnScreen.y - origin.y
+            val newX = initialWin.x + dx
+            val newY = initialWin.y + dy
+            window.setLocation(newX, newY)
+        }
+    })
 }

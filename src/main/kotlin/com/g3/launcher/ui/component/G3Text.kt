@@ -39,6 +39,7 @@ fun G3Text(
 ) {
     var isEnabled by remember { mutableStateOf(enabled) }
     var isHovered by remember { mutableStateOf(false) }
+    var isHover by remember { mutableStateOf(hoverable) }
 
     val style = if (shadow) {
         textStyle ?: LocalTextStyle.current.copy(
@@ -73,8 +74,16 @@ fun G3Text(
     }
 
     LaunchedEffect(hoverForce) {
-        if (hoverable) {
+        if (isHover) {
             isHovered = hoverForce
+        }
+    }
+
+    LaunchedEffect(hoverable) {
+        isHover = hoverable
+
+        if (!hoverable) {
+            isHovered = false
         }
     }
 
@@ -92,7 +101,7 @@ fun G3Text(
         overflow = overflow,
         modifier = modifier
             .hoverEffect {
-                if (hoverable && isEnabled) {
+                if (isHover && isEnabled) {
                     isHovered = it
                 }
             }
