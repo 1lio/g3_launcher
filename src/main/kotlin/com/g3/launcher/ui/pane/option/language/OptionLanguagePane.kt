@@ -310,7 +310,6 @@ private fun DownloadOptionItem(
             .fillMaxWidth()
             .hoverEffect { isHovered = it }
             .clickable {
-                // ❗ логика клика
                 when {
                     progress in 1..99 && started -> onClick(false) // пауза
                     progress in 1..99 && !started -> onClick(true) // продолжить
@@ -330,7 +329,7 @@ private fun DownloadOptionItem(
             Image(
                 painter = painterResource(Res.drawable.ic_ok),
                 contentDescription = null,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(20.dp)
             )
         } else {
 

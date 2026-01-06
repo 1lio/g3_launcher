@@ -12,4 +12,11 @@ object WindowManager {
             it.requestFocus()
         } ?: body()
     }
+
+    fun bringMainWindow() {
+        mainWindow?.let {
+            it.toFront()
+            it.requestFocus()
+        }
+    }
 }

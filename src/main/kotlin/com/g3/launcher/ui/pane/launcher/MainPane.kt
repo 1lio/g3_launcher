@@ -135,6 +135,7 @@ fun ApplicationScope.MainPane(
         if (showOption) {
             OptionWindows {
                 showOption = false
+                WindowManager.bringMainWindow()
             }
         }
     }
