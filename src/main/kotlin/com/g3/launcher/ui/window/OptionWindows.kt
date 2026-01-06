@@ -22,6 +22,7 @@ import com.g3.launcher.ui.component.BgPosition
 import com.g3.launcher.ui.component.MainBox
 import com.g3.launcher.ui.component.option.OptionTabSelector
 import com.g3.launcher.ui.pane.option.language.OptionLanguagePane
+import com.g3.launcher.ui.pane.option.other.OtherOptionPane
 
 @Composable
 fun ApplicationScope.OptionWindows(
@@ -54,6 +55,9 @@ fun ApplicationScope.OptionWindows(
                 ) {
                     when (tabIndex) {
                         0 -> OptionLanguagePane()
+                        1 -> {}
+                        2 -> {}
+                        3 -> OtherOptionPane()
                         else -> {}
                     }
                 }

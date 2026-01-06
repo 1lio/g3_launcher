@@ -3,6 +3,8 @@ package com.g3.launcher.ui.pane.launcher
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.g3.launcher.manager.LauncherManager
+import com.g3.launcher.manager.RegistryManager
 import com.g3.launcher.manager.SteamManager
 import com.g3.launcher.manager.WindowManager
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class MainViewModel {
     var gameStarted: Boolean by mutableStateOf(false)
@@ -44,7 +47,25 @@ class MainViewModel {
         gameStarted = true
         gameRun = true
 
-        SteamManager.startGame()  // Какая-то логика на запуск игры с модами, скорее из другой директории, пока просто запуск
+        try {
+            // Пока просто запус из другой директории
+            // Сохранения пока общие
+            val exe = LauncherManager.config.gameDirPath?.let { "$it\\GameWithMods\\Gothic3.exe" } ?: return
+            val exeFile = File(exe)
+            val processBuilder = ProcessBuilder(exe)
+
+            // Устанавливаем рабочую директорию (где находится exe файл)
+            processBuilder.directory(exeFile.parentFile)
+
+            val process = processBuilder.start()
+            Thread {
+                process.waitFor()
+                gameRun = false
+            }.start()
+
+        } catch (ex: Exception) {
+            gameRun = false
+        }
     }
 
     private fun startGameMonitoring() {
