@@ -10,6 +10,7 @@ object RegistryManager {
     private const val JOWOOD_GOTHIC_KEY = "HKCU\\Software\\JoWooD\\Gothic III"
     private const val STEAM_GOTHIC_KEY = "HKCU\\SOFTWARE\\Valve\\Steam\\Apps\\39500"
     private const val DOCUMENTS = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders"
+    private const val UNINSTALL_STEAM_GOTHIC_KEY = "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 39500"
 
     fun getSystemLanguage(): String {
         val lang = getRegProperty(JOWOOD_GOTHIC_KEY, "OSLanguage")
@@ -22,6 +23,9 @@ object RegistryManager {
 
         val steam = getRegProperty(STEAM_GOTHIC_KEY, "InstallLocation")?.normalizePath()
         if (!steam.isNullOrBlank() && File(steam).exists()) return steam
+
+        val unstall = getRegProperty(UNINSTALL_STEAM_GOTHIC_KEY, "InstallLocation")?.normalizePath()
+        if (!unstall.isNullOrBlank() && File(unstall).exists()) return unstall
 
         return null
     }
