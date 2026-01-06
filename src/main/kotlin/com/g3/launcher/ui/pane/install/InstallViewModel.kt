@@ -4,9 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.g3.launcher.manager.GameSaveManager
 import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.manager.PackagesManager
 import com.g3.launcher.mapper.toLocales
+import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.InstallPackages
 import com.g3.launcher.model.LauncherConfig
 import kotlinx.coroutines.*
@@ -582,11 +584,18 @@ class InstallViewModel {
         backupComplete = true
         updateStep(SetupStep.CreateBackup(true))
         updateInstallProgress()
-
+        syncSettings()
         // Installation completed
         println("Installation completed successfully!")
 
         LauncherManager.updateConfig { copy(installed = true) }
+    }
+
+    private fun syncSettings() {
+        val currentVoiceLang = GameSaveManager.getVoiceLang().key
+        if (!config.packages.contains(currentVoiceLang)) {
+            GameSaveManager.setVoiceLanguage(G3Language.En)
+        }
     }
 
     private fun updateStep(newStep: SetupStep) {

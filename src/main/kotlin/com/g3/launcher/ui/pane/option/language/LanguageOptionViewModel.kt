@@ -8,10 +8,10 @@ import com.g3.launcher.manager.*
 import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.GameConfig
 import com.g3.launcher.model.LauncherConfig
-import com.g3.launcher.ui.pane.install.InstallViewModel.Stage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -113,7 +113,6 @@ class LanguageOptionViewModel {
             progress = 100
         )
 
-
         // Обновляем конфигурацию лаунчера
         scope.launch {
             val packages = config.packages.toMutableList()
@@ -123,6 +122,7 @@ class LanguageOptionViewModel {
                 LauncherManager.updateConfig {
                     copy(packages = packages.toList())
                 }
+                println("config update: $config")
 
                 // Проверяем, не нужно ли обновить текущий язык озвучки
                 checkAndUpdateCurrentVoiceLang(key)
@@ -194,13 +194,18 @@ class LanguageOptionViewModel {
         val gamePath = LauncherManager.config.gameDirPath ?: return
         val localeFile = File("app/resources/$key.zip")
 
-        try {
-            localeFile.inputStream().use { input ->
-                extractZipArchive(input, File("$gamePath/Data")) {}
+        scope.launch {
+            delay(1500)
+            try {
+                localeFile.inputStream().use { input ->
+                    extractZipArchive(input, File("$gamePath/Data")) {}
+                }
+
+                println("Installation $key complete")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw e
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
         }
     }
 
