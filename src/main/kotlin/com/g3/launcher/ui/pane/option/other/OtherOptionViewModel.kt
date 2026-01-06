@@ -100,13 +100,7 @@ class OtherOptionViewModel {
                         copyProgress = 100
                         LauncherManager.updateConfig { copy(mods = true) }
 
-                    } catch (ex: Exception) {
-                        JOptionPane.showMessageDialog(
-                            null,
-                            "Не удалось создать копию игры для модов:\n${ex.message}",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE
-                        )
+                    } catch (_: Exception) {
                         // Откатываем изменения при ошибке
                         modsDir.deleteRecursively()
                         copyProgress = 0
@@ -168,12 +162,6 @@ class OtherOptionViewModel {
         val gameDirFile = File(gameDir)
 
         if (isCopying) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Подождите завершения копирования",
-                "Внимание",
-                JOptionPane.WARNING_MESSAGE
-            )
             return
         }
 
@@ -182,8 +170,8 @@ class OtherOptionViewModel {
         ) {
             val confirm = JOptionPane.showConfirmDialog(
                 null,
-                "Вы уверены, что хотите удалить директорию модов?\n${modsDir.absolutePath}",
-                "Подтверждение удаления",
+                "${config.language.strings.deleteModDirectoryConfirmation}\n${modsDir.absolutePath}",
+                config.language.strings.deleteConfirmation,
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
             )
@@ -196,8 +184,8 @@ class OtherOptionViewModel {
                     } catch (ex: Exception) {
                         JOptionPane.showMessageDialog(
                             null,
-                            "Не удалось удалить директорию модов:\n${ex.message}",
-                            "Ошибка",
+                            "${config.language.strings.failedToDeleteModDirectory}\n${ex.message}",
+                            config.language.strings.error,
                             JOptionPane.ERROR_MESSAGE
                         )
                     }
@@ -302,7 +290,7 @@ class OtherOptionViewModel {
         JOptionPane.showMessageDialog(
             null,
             message,
-            "Ошибка",
+            config.language.strings.error,
             JOptionPane.ERROR_MESSAGE
         )
     }

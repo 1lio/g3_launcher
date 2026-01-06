@@ -59,5 +59,18 @@ class HuLocalization : Localization {
     override val localizationFilesLoadingNote: String = "Megjegyzés: A játék indítása során csak 1 Speech fájlnak kell aktívnak lennie. Ha indító nélkül játszik, távolítsa el a ; jelet a kívánt hangfájl előtt az Ini/mountlist.ini fájlban"
     override val download: String = "Letöltés"
     override val resume: String = "Folytatás"
+    override val copyDirectory: String = "Könyvtár másolása"
+    override val copyCurrentGameDirectory: String = "Jelenlegi játék könyvtár másolása"
+    override val playWithMods: String = "Játék modokkal"
+    override val modCopyDescription: String = "A játék másolata készül a modokkal való játékhoz.\n\nA normál játék és a modosított játék mentései elkülönülnek.\n\nAjánlott a modosított játékot csak a launcheren keresztül indítani, hogy ne legyen zavar a mentések között"
+    override val deleteModDirectory: String = "Mod könyvtár törlése"
+    override val deleteModWarning: String = "Figyelem! Az összes telepített modot tartalmazó könyvtár törlődik.\n\nA mentések nem lesznek érintettek"
+    override val mainDirectories: String = "Fő könyvtárak"
+    override val moddedGameDirectory: String = "Modosított játék könyvtára"
+    override val gameSettingsFiles: String = "Játék beállítás fájlok"
+    override val deleteConfirmation: String = "Törlés megerősítése"
+    override val deleteModDirectoryConfirmation: String = "Biztosan törölni szeretné a mod könyvtárat?"
+    override val failedToDeleteModDirectory: String = "Nem sikerült törölni a mod könyvtárat:"
+    override val error: String = "Hiba"
 
 }

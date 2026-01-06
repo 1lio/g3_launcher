@@ -57,26 +57,24 @@ fun OtherOptionPane(
     ) {
         if (viewModel.isCopying) {
             OptionItem(
-                text = "Копирование директории ${viewModel.copyProgress}%",
-                description = "",
+                text = "${strings.copyDirectory} ${viewModel.copyProgress}%",
+                description = strings.copyCurrentGameDirectory,
                 onClick = {},
             )
         } else {
             OptionCheckBox(
-                text = "Играть с модами",
-                description = "Будет создана копия игры для игры с модами.\n\n" +
-                        "Сохранения обычной игры и с модами будут разделены.\n\n" +
-                        "Рекомендуется при комбинировании игры запускать только через лаунчер иначе может быть путаница сохранений",
+                text = strings.playWithMods,
+                description = strings.modCopyDescription,
                 checked = config.mods,
                 onCheckedChange = viewModel::playWithMods
             )
         }
 
         if (config.mods) {
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
             OptionItem(
-                text = "Удалить директорию с модами",
-                description = "Внимание! Будет удалена директория со всеми установленными модами. \n\nСохранения затронуты не будут",
+                text = strings.deleteModDirectory,
+                description = strings.deleteModWarning,
                 onClick = {
                     viewModel.removeModsDir()
                     viewModel.playWithMods(false)
@@ -84,10 +82,10 @@ fun OtherOptionPane(
             )
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(40.dp))
 
         OptionGroup(
-            text = "Основные директории",
+            text = strings.mainDirectories,
             fontSize = 14.sp,
             color = ColorTextSecondary,
             fontWeight = FontWeight.Medium,
@@ -107,17 +105,17 @@ fun OtherOptionPane(
 
             if (config.mods) {
                 DirectoryItem(
-                    title = "Директория игры с модами",
+                    title = strings.moddedGameDirectory,
                     subtitle = viewModel.gameWithModsDir,
                     onClick = viewModel::openGameWithModsDir
                 )
             }
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(40.dp))
 
         OptionGroup(
-            text = "Основные файлы игры",
+            text = strings.gameSettingsFiles,
             fontSize = 14.sp,
             color = ColorTextSecondary,
             fontWeight = FontWeight.Medium,

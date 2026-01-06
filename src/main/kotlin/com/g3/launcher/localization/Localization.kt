@@ -70,4 +70,17 @@ interface Localization {
     val download: String
     val resume: String
 
+    val copyDirectory: String
+    val copyCurrentGameDirectory: String
+    val playWithMods: String
+    val modCopyDescription: String
+    val deleteModDirectory: String
+    val deleteModWarning: String
+    val mainDirectories: String
+    val moddedGameDirectory: String
+    val gameSettingsFiles: String
+    val deleteConfirmation: String
+    val deleteModDirectoryConfirmation: String
+    val failedToDeleteModDirectory: String
+    val error: String
 }

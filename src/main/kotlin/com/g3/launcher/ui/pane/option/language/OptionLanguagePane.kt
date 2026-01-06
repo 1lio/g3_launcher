@@ -61,7 +61,7 @@ fun OptionLanguagePane(
             onLanguageSelected = viewModel::selectTextLang
         )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
 
         LanguageSelector(
             title = strings.voiceLanguage,
@@ -76,7 +76,7 @@ fun OptionLanguagePane(
             onLanguageSelected = viewModel::selectVoiceLang
         )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
 
         OptionCheckBox(
             text = strings.subtitles,
@@ -86,7 +86,7 @@ fun OptionLanguagePane(
         )
 
         if (viewModel.optionRuIntro) {
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
             OptionCheckBox(
                 text = strings.localizedIntro,
                 description = strings.introDescription,
@@ -95,7 +95,7 @@ fun OptionLanguagePane(
             )
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(40.dp))
 
         if (viewModel.voiceLanguages.isNotEmpty()) {
             OptionGroup(
