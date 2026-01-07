@@ -8,7 +8,6 @@ import com.g3.launcher.manager.GameSaveManager
 import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.manager.PackagesManager
 import com.g3.launcher.mapper.toLocales
-import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.InstallPackages
 import com.g3.launcher.model.LauncherConfig
 import kotlinx.coroutines.*
@@ -232,9 +231,9 @@ class InstallViewModel {
                         updateSetupStageIfActive()
 
                         // Если все загружено и мы на Setup - можно начинать установку локализаций
-                        if (areAllDownloadsComplete() && stage is Stage.Setup) {
-                            checkAndStartInstallation()
-                        }
+                        // if (areAllDownloadsComplete() && stage is Stage.Setup) {
+                        //     checkAndStartInstallation()
+                        // }
                     }
                 }
                 println("$locale localization download completed")
@@ -584,18 +583,12 @@ class InstallViewModel {
         backupComplete = true
         updateStep(SetupStep.CreateBackup(true))
         updateInstallProgress()
-        syncSettings()
+
+        GameSaveManager.firstConfig(config.packages)
         // Installation completed
         println("Installation completed successfully!")
 
         LauncherManager.updateConfig { copy(installed = true) }
-    }
-
-    private fun syncSettings() {
-        val currentVoiceLang = GameSaveManager.getVoiceLang().key
-        if (!config.packages.contains(currentVoiceLang)) {
-            GameSaveManager.setVoiceLanguage(G3Language.En)
-        }
     }
 
     private fun updateStep(newStep: SetupStep) {

@@ -30,7 +30,7 @@ class OtherOptionViewModel {
 
     val ge3IniPath = "$gameDir\\Ini\\ge3.ini"
     val mountlistIniPath = "$gameDir\\Ini\\mountlist.ini"
-    val userOptionPath = "$gameSaveDir\\UserOptions.ini"
+    val userOptionPath = "$gameSaveDir\\Vanilla\\UserOptions.ini"
 
     fun playWithMods(value: Boolean) {
         val modsDir = File(gameWithModsDir)

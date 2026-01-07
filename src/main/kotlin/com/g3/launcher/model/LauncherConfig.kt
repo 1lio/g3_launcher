@@ -13,6 +13,7 @@ data class LauncherConfig(
     val gameSaveDirPath: String?,
     val mods: Boolean,
     val availableUpdate: Boolean,
+    val modsConfig: Boolean,
 )
 
 val LocalConfig = compositionLocalOf { LauncherManager.config }

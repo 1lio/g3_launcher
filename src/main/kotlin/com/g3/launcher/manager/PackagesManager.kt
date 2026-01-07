@@ -1,12 +1,18 @@
 package com.g3.launcher.manager
 
 import com.g3.launcher.Constants.LAUNCHER_VERSION
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
@@ -17,12 +23,6 @@ import kotlin.math.roundToInt
  * Работа с пакетами установки
  */
 object PackagesManager {
-    data class DownloadState(
-        val key: String,
-        val progress: Int,
-        val isRunning: Boolean
-    )
-
     private const val BASE_URL = "https://github.com/1lio/g3_launcher/releases/download/$LAUNCHER_VERSION"
 
     private const val BASE_PATH: String = "app/resources/base.zip"
@@ -34,7 +34,6 @@ object PackagesManager {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // Отдельные мьютексы для каждого типа файлов
     private val baseMutex = Mutex()
     private val languageMutexes = mutableMapOf<String, Mutex>() // Язык -> Mutex
 
@@ -240,7 +239,6 @@ object PackagesManager {
 
                 connection.inputStream.use { input ->
                     val buffer = ByteArray(8192)
-                    var bytesRead: Int
                     var lastProgress = -1
 
                     while (true) {

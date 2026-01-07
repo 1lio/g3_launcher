@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g3.launcher.g3_laucher.generated.resources.Res
 import com.g3.launcher.g3_laucher.generated.resources.ic_ok
+import com.g3.launcher.manager.GameSaveManager
 import com.g3.launcher.model.G3Language
+import com.g3.launcher.model.LocalConfig
 import com.g3.launcher.model.LocalLanguage
 import com.g3.launcher.ui.component.G3Text
 import com.g3.launcher.ui.component.option.OptionCheckBox
@@ -47,7 +50,12 @@ import org.jetbrains.compose.resources.painterResource
 fun OptionLanguagePane(
     viewModel: LanguageOptionViewModel = remember { LanguageOptionViewModel() }
 ) {
+    val config = LocalConfig.current
     val strings = LocalLanguage.current.strings
+
+    LaunchedEffect(config) {
+        viewModel.updateSettingsType(config.modsConfig)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),

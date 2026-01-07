@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.g3.launcher.manager.*
 import com.g3.launcher.model.G3Language
-import com.g3.launcher.model.GameConfig
 import com.g3.launcher.model.LauncherConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +28,6 @@ data class AvailableVoiceLanguage(
 
 class LanguageOptionViewModel {
     private val config: LauncherConfig = LauncherManager.config
-    private val gameConfig: GameConfig = GameConfigManager.gameConfig
 
     private val _voiceLanguages = mutableStateListOf<AvailableVoiceLanguage>()
     val voiceLanguages: List<AvailableVoiceLanguage> get() = _voiceLanguages
@@ -38,20 +36,20 @@ class LanguageOptionViewModel {
         initLanguagesFast()
     }
 
-    var currentTextLang: G3Language by mutableStateOf(gameConfig.textLang)
+    var currentTextLang: G3Language by mutableStateOf(GameSaveManager.getTextLang())
         private set
 
-    var currentVoiceLang: G3Language by mutableStateOf(gameConfig.voiceLang)
+    var currentVoiceLang: G3Language by mutableStateOf(GameSaveManager.getVoiceLang())
         private set
 
-    var showSubs: Boolean by mutableStateOf(gameConfig.subs)
+    var showSubs: Boolean by mutableStateOf(GameSaveManager.isShowSubs())
         private set
 
     var optionRuIntro: Boolean = config.language == G3Language.Ru
         get() = currentVoiceLang == G3Language.Ru
         private set
 
-    var showRuInto: Boolean by mutableStateOf(gameConfig.ruIntro)
+    var showRuInto: Boolean by mutableStateOf(GameManager.isUseRuIntro())
         private set
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -73,6 +71,15 @@ class LanguageOptionViewModel {
                 )
             )
         }
+    }
+
+    fun updateSettingsType(mods: Boolean) {
+        GameSaveManager.setGameMode(mods)
+
+        currentTextLang = GameSaveManager.getTextLang()
+        currentVoiceLang = GameSaveManager.getVoiceLang()
+        showSubs = GameSaveManager.isShowSubs()
+        showRuInto =  GameManager.isUseRuIntro()
     }
 
     fun downloadLang(key: String, download: Boolean) {
@@ -163,7 +170,6 @@ class LanguageOptionViewModel {
     fun selectTextLang(language: G3Language) {
         currentTextLang = language
         GameSaveManager.setTextLanguage(language)
-        GameConfigManager.updateConfig { copy(textLang = language) }
     }
 
     fun selectVoiceLang(language: G3Language) {
@@ -172,7 +178,6 @@ class LanguageOptionViewModel {
 
         GameManager.setVoiceLanguage(language)
         GameSaveManager.setVoiceLanguage(language)
-        GameConfigManager.updateConfig { copy(voiceLang = language) }
 
         val selectRuIntro = language == G3Language.Ru
         selectRuIntro(selectRuIntro)
@@ -181,17 +186,16 @@ class LanguageOptionViewModel {
     fun selectSubs(enabled: Boolean) {
         showSubs = enabled
         GameSaveManager.setSubs(enabled)
-        GameConfigManager.updateConfig { copy(subs = enabled) }
     }
 
     fun selectRuIntro(enabled: Boolean) {
         showRuInto = enabled
         GameManager.useRuIntro(enabled)
-        GameConfigManager.updateConfig { copy(ruIntro = enabled) }
     }
 
     private fun installLocalization(key: String) {
         val gamePath = LauncherManager.config.gameDirPath ?: return
+        val gameModePath = "${LauncherManager.config.gameDirPath}\\GameWithMods"
         val localeFile = File("app/resources/$key.zip")
 
         scope.launch {
@@ -199,6 +203,13 @@ class LanguageOptionViewModel {
             try {
                 localeFile.inputStream().use { input ->
                     extractZipArchive(input, File("$gamePath/Data")) {}
+                }
+
+                val modsDir = File(gameModePath)
+                if (modsDir.exists()) {
+                    localeFile.inputStream().use { input ->
+                        extractZipArchive(input, File("$modsDir/Data")) {}
+                    }
                 }
 
                 println("Installation $key complete")

@@ -16,6 +16,7 @@ fun LauncherConfigJson.toConfig(
         gameDirPath = gameDir,
         gameSaveDirPath = gameSaveDir,
         availableUpdate = availableUpdate,
+        modsConfig = modsConfig,
     )
 }
 
@@ -28,5 +29,6 @@ fun LauncherConfig.toJson(): LauncherConfigJson {
         packages = packages,
         gameDir = gameDirPath,
         gameSaveDir = gameSaveDirPath,
+        modsConfig = modsConfig,
     )
 }

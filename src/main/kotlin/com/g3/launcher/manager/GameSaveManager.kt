@@ -3,14 +3,74 @@ package com.g3.launcher.manager
 import com.g3.launcher.model.G3GraphicPreset
 import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.GraphicsPreset
+import java.io.File
 
 object GameSaveManager {
-    private val dir: String? = LauncherManager.config.gameSaveDirPath
-    private val path: String = dir?.let { "${it}\\UserOptions.ini" }
-        ?: throw Exception("Failure: Not found GameSaveDir")
 
-    fun firsConfig() {
-        cleanSaveDir()
+    private const val USER_OPTIONS = "UserOptions.ini"
+
+    private val SAVE_FILE_EXTENSIONS = setOf(
+        "g3savcp",
+        "g3savcpx",
+        "g3savcpdat",
+        "g3savcpxdat",
+    )
+
+    private val IMPORTANT_FILES = setOf(
+        "Shader.Cache",
+        USER_OPTIONS,
+    )
+
+    private const val VANILLA_SAVES_DIR = "Vanilla"
+    private const val MODS_SAVES_DIR = "WithMods"
+
+    private val saveDir: String = LauncherManager.config.gameSaveDirPath ?: ""
+    private var isGameWithMods: Boolean = false
+
+    private val path: String
+        get() {
+            val target = if (isGameWithMods) MODS_SAVES_DIR else VANILLA_SAVES_DIR
+            return saveDir.let { "${it}\\${target}\\$USER_OPTIONS" }
+        }
+
+    fun setGameMode(withMods: Boolean) {
+        isGameWithMods = withMods
+        println("setGameMOde $withMods")
+    }
+
+    fun firstConfig(packages: List<String>) {
+        val rootSaveDir = File(saveDir)
+
+        val vanillaSavesDir = File(saveDir, VANILLA_SAVES_DIR)
+        if (!vanillaSavesDir.exists()) {
+            vanillaSavesDir.mkdir()
+        }
+
+        val modsSaveDir = File(saveDir, MODS_SAVES_DIR)
+        if (!modsSaveDir.exists()) {
+            modsSaveDir.mkdir()
+        }
+
+        val currentVoiceLang = getVoiceLang().key
+        if (!packages.contains(currentVoiceLang)) {
+            setVoiceLanguage(G3Language.En)
+        }
+
+        copySaveFiles(
+            sourceDir = rootSaveDir,
+            targetDir = vanillaSavesDir,
+            skipDirectories = listOf(VANILLA_SAVES_DIR, MODS_SAVES_DIR)
+        )
+
+        copyUserOptions(
+            sourceDir = rootSaveDir,
+            targetDir = vanillaSavesDir
+        )
+
+        copyUserOptions(
+            sourceDir = rootSaveDir,
+            targetDir = modsSaveDir
+        )
 
         val preset = when (DeviceManager.AVAILABLE_RAM) {
             1 -> G3GraphicPreset.Low
@@ -18,12 +78,6 @@ object GameSaveManager {
             4 -> G3GraphicPreset.High
             else -> G3GraphicPreset.VeryHigh
         }
-
-     /*   LauncherManager.updateConfig {
-            copy(
-                gPreset = preset
-            )
-        }*/
 
         setPreset(preset)
     }
@@ -90,8 +144,6 @@ object GameSaveManager {
             key = "VSync",
             newValue = if (value) "1" else "0"
         )
-
-      /*  LauncherManager.updateConfig { copy(vSync = value) }*/
     }
 
     fun setFpsLimit(value: Boolean) {
@@ -102,8 +154,6 @@ object GameSaveManager {
             newValue = if (value) "60" else "${DeviceManager.FRAME_RATE}"
         )
         enableVsync(true)
-
-     /*   LauncherManager.updateConfig { copy(fpsLimit = value) }*/
     }
 
     fun setAltCamera(value: Boolean) {
@@ -113,12 +163,6 @@ object GameSaveManager {
             key = "AltCamera",
             newValue = value.toString()
         )
-
-       /* LauncherManager.updateConfig { copy(fpsLimit = value) }*/
-    }
-
-    fun cleanSaveDir() {
-
     }
 
     fun setPreset(preset: GraphicsPreset) {
@@ -218,5 +262,49 @@ object GameSaveManager {
         ) ?: "Custom"
 
         return G3GraphicPreset.valueOf(value)
+    }
+
+    private fun copySaveFiles(sourceDir: File, targetDir: File, skipDirectories: List<String> = emptyList()) {
+        if (!sourceDir.exists() || !sourceDir.isDirectory) return
+
+        targetDir.mkdirs()
+
+        // Копируем только файлы, исключая указанные папки
+        sourceDir.listFiles()?.forEach { file ->
+            if (file.name !in skipDirectories) {
+                val targetFile = File(targetDir, file.name)
+                try {
+                    if (file.isFile && shouldCopyFile(file)) { // Копируем только файлы
+                        file.copyTo(targetFile, overwrite = true)
+                    }
+                } catch (_: Exception) {
+                    // Игнорируем ошибки копирования
+                }
+            }
+        }
+    }
+
+    private fun shouldCopyFile(file: File): Boolean {
+        if (!file.isFile) return false // Не копируем папки
+
+        val name = file.name
+        val extension = file.extension.lowercase()
+
+        // Проверяем расширения .g3savcp, .g3savcpx, .g3savcpdat, .g3savcpxdat
+        val isSaveFile = extension in SAVE_FILE_EXTENSIONS
+
+        // Проверяем важные файлы
+        val isImportantFile = name in IMPORTANT_FILES
+
+        return isSaveFile || isImportantFile
+    }
+
+    private fun copyUserOptions(
+        sourceDir: File,
+        targetDir: File,
+    ) {
+        val options = File("$sourceDir\\$USER_OPTIONS")
+        val targetFile = File("$targetDir\\$USER_OPTIONS")
+        options.copyTo(targetFile, overwrite = true)
     }
 }

@@ -8,7 +8,8 @@ object ModsManager {
 
     fun isAvailable(): Boolean {
         return RegistryManager.getGameDir()?.let {
-            File("$it/${DIR_NAME}").exists()
+            val dir = File("$it/${DIR_NAME}")
+            dir.exists() && dir.isDirectory && dir.listFiles().isNotEmpty()
         } ?: false
     }
 

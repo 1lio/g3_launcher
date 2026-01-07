@@ -11,4 +11,5 @@ class LauncherConfigJson(
     val gameDir: String?,
     val gameSaveDir: String?,
     val mods: Boolean,
+    val modsConfig: Boolean,
 )

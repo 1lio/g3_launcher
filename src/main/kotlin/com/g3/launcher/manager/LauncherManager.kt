@@ -37,6 +37,7 @@ object LauncherManager {
             gameSaveDirPath = RegistryManager.getGameSaveDir(),
             mods = ModsManager.isAvailable(),
             availableUpdate = false,
+            modsConfig = false,
         )
 
         saveConfig(defaultConfig)

@@ -61,6 +61,13 @@ object GameManager {
         Files.move(temp.toPath(), b.toPath(), StandardCopyOption.REPLACE_EXISTING)
     }
 
+    fun isUseRuIntro(): Boolean {
+        val intro = File(gameDir, "Data/Video/G3_Intro.bik").length()
+        val introRu = File(gameDir, "Data/Video/G3_IntroRu.bik").length()
+
+        return introRu < intro
+    }
+
     fun firstConfig() {
         IniFileManager.updateValue(
             filePath = g3Path,
