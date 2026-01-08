@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.g3.launcher.manager.GameManager
 import com.g3.launcher.manager.GameSaveManager
 import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.manager.PackagesManager
@@ -584,6 +585,8 @@ class InstallViewModel {
         updateStep(SetupStep.CreateBackup(true))
         updateInstallProgress()
 
+        println("First config...")
+        GameManager.firstConfig()
         GameSaveManager.firstConfig(config.packages)
         // Installation completed
         println("Installation completed successfully!")

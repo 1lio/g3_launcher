@@ -22,13 +22,17 @@ import com.g3.launcher.Constants
 import com.g3.launcher.g3_laucher.generated.resources.Res
 import com.g3.launcher.g3_laucher.generated.resources.bg_options
 import com.g3.launcher.g3_laucher.generated.resources.headline_line
+import com.g3.launcher.manager.GameManager
+import com.g3.launcher.manager.GameSaveManager
 import com.g3.launcher.manager.LauncherManager
 import com.g3.launcher.manager.WindowManager
 import com.g3.launcher.model.LocalConfig
+import com.g3.launcher.model.LocalLanguage
 import com.g3.launcher.ui.component.BgPosition
 import com.g3.launcher.ui.component.MainBox
 import com.g3.launcher.ui.component.option.OptionCheckBox
 import com.g3.launcher.ui.component.option.OptionTabSelector
+import com.g3.launcher.ui.pane.option.game.OptionGamePane
 import com.g3.launcher.ui.pane.option.language.OptionLanguagePane
 import com.g3.launcher.ui.pane.option.other.OtherOptionPane
 import org.jetbrains.compose.resources.painterResource
@@ -39,10 +43,7 @@ fun ApplicationScope.OptionWindows(
 ) {
     var tabIndex by remember { mutableStateOf(0) }
     val config = LocalConfig.current
-
-    LaunchedEffect(config) {
-        println(config.modsConfig)
-    }
+    val strings = LocalLanguage.current.strings
 
     G3Window(
         width = Constants.OPTIONS_WIDTH,
@@ -68,10 +69,12 @@ fun ApplicationScope.OptionWindows(
                         verticalArrangement = Arrangement.spacedBy(36.dp)
                     ) {
                         OptionCheckBox(
-                            text = "Конфигурация для игры с модами",
-                            description = "Текущие настройки конфигурации",
+                            text = strings.moddedConfigurationToggle,
+                            description = strings.moddedConfigurationDescription,
                             checked = config.modsConfig,
                             onCheckedChange = {
+                                GameManager.setGameMode(it)
+                                GameSaveManager.setGameMode(it)
                                 LauncherManager.updateConfig { copy(modsConfig = it) }
                             }
                         )
@@ -80,7 +83,6 @@ fun ApplicationScope.OptionWindows(
                             painter = painterResource(Res.drawable.headline_line),
                             contentDescription = null,
                             modifier = Modifier
-                                // .height(12.dp)
                                 .fillMaxWidth()
                         )
                     }
@@ -94,7 +96,7 @@ fun ApplicationScope.OptionWindows(
                     when (tabIndex) {
                         0 -> OptionLanguagePane()
                         1 -> {}
-                        2 -> {}
+                        2 -> OptionGamePane()
                         3 -> OtherOptionPane()
                         else -> {}
                     }
@@ -105,7 +107,7 @@ fun ApplicationScope.OptionWindows(
         DisposableEffect(Unit) {
             WindowManager.optionsWindow = window
             onDispose {
-                WindowManager.optionsWindow = null
+             //   WindowManager.optionsWindow = null
             }
         }
     }

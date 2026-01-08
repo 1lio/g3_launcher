@@ -13,13 +13,108 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 object GameManager {
+
+    private var isGameWithMods: Boolean = false
+
     private val gameDir = LauncherManager.config.gameDirPath
-    private val g3Path = gameDir?.let { "${it}/Ini/ge3.ini" } ?: throw Exception("g3.ini not found")
+
+    private val path: String
+        get() {
+            val target = if (isGameWithMods) "\\GameWithMods" else ""
+            return gameDir.let { "${it}${target}" }
+        }
+
+    private val g3Path
+        get() = path.let { "${it}\\Ini\\ge3.ini" }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val videoMutex = Mutex()
 
-    fun setGFonts(enabled: Boolean) {
+    fun setGameMode(mods: Boolean) {
+        isGameWithMods = mods
+    }
+
+    fun setTestMode(enabled: Boolean) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "TestMode",
+            newValue = enabled.toString()
+        )
+    }
+
+    fun isTestMode(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "TestMode",
+        )
+        return value == "true"
+    }
+
+    fun setQuickLoot(enabled: Boolean) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "QuickLoot",
+            newValue = enabled.toString()
+        )
+    }
+
+    fun isQuickLoot(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "QuickLoot",
+        )
+        return value == "true"
+    }
+
+    fun setLockGame(enabled: Boolean) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "LocksPlugin",
+            newValue = if (enabled) "1" else "0"
+        )
+    }
+
+    fun isLockGame(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "LocksPlugin",
+        )
+        return value == "1"
+    }
+
+    fun setExtendedContent(enabled: Boolean) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "ExtendedContent",
+            newValue = if (enabled) "1" else "0"
+        )
+    }
+
+    fun isExtendedContent(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "ExtendedContent",
+        )
+        return value == "1"
+    }
+
+
+    // [Game]
+    // MinHitDuration=6
+    // AIMode=true
+    // XPModifier=100
+    // QuestXPModifier=100
+
+
+    fun setGFont(enabled: Boolean) {
         IniFileManager.updateValue(
             filePath = g3Path,
             section = "Engine.Setup",
@@ -33,6 +128,15 @@ object GameManager {
             key = "GUI.DefaultFontBold",
             newValue = if (enabled) "true" else "default"
         )
+    }
+
+    fun isGFont(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Engine.Setup",
+            key = "GUI.DefaultFont",
+        )
+        return value == "Gothic3"
     }
 
     fun useRuIntro(enabled: Boolean) {
@@ -103,6 +207,26 @@ object GameManager {
                 section = section,
                 key = key,
                 newValue = value
+            )
+        }
+    }
+
+    fun isSkipIntro(): Boolean {
+        val logoIni = File("$path\\Ini\\logo.ini")
+        return logoIni.length() == 0L
+    }
+
+    fun skipIntro(value: Boolean) {
+        val logoIni = File("$path\\Ini\\logo.ini")
+        if (value) {
+            logoIni.writeText("")
+        } else {
+            logoIni.writeText(
+                """
+                    G3_Logo_01.bik
+                    Publisher.bik
+                    CPT.bik
+                """.trimIndent()
             )
         }
     }

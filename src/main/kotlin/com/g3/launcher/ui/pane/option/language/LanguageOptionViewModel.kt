@@ -74,6 +74,7 @@ class LanguageOptionViewModel {
     }
 
     fun updateSettingsType(mods: Boolean) {
+        GameManager.setGameMode(mods)
         GameSaveManager.setGameMode(mods)
 
         currentTextLang = GameSaveManager.getTextLang()

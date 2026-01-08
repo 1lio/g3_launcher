@@ -35,8 +35,17 @@ object GameSaveManager {
 
     fun setGameMode(withMods: Boolean) {
         isGameWithMods = withMods
-        println("setGameMOde $withMods")
     }
+
+    fun setExtendedContent(enabled: Boolean) {
+        IniFileManager.updateValue(
+            filePath = path,
+            section = "Options.Difficulty",
+            key = "ExtendedContent",
+            newValue = enabled.toString()
+        )
+    }
+
 
     fun firstConfig(packages: List<String>) {
         val rootSaveDir = File(saveDir)
@@ -163,6 +172,15 @@ object GameSaveManager {
             key = "AltCamera",
             newValue = value.toString()
         )
+    }
+
+    fun isAltCamera(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = path,
+            section = "Options.Controls",
+            key = "AltCamera",
+        )
+        return value == "true"
     }
 
     fun setPreset(preset: GraphicsPreset) {
