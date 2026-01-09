@@ -90,14 +90,14 @@ fun OptionGraphicsPane(
                 text = strings.verticalSync,
                 description = strings.verticalSyncDescription,
                 checked = viewModel.vSync,
-                onCheckedChange = viewModel::setVsync
+                onCheckedChange = viewModel::vsync
             )
 
             OptionCheckBox(
                 text = strings.fpsLimit60,
                 description = strings.fpsLimit60Description,
                 checked = viewModel.fpsLimit,
-                onCheckedChange = viewModel::setFpsLimit
+                onCheckedChange = viewModel::fpsLimit
             )
         }
     }

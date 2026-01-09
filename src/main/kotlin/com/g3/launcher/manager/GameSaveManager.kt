@@ -157,11 +157,12 @@ object GameSaveManager {
     }
 
     fun isVsync(): Boolean {
-        return IniFileManager.readValue(
+        val value = IniFileManager.readValue(
             filePath = path,
             section = "Options.Video",
             key = "VSync",
-        )?.toBoolean() ?: false
+        )
+        return value == "1"
     }
 
     fun setFpsLimit(value: Boolean) {

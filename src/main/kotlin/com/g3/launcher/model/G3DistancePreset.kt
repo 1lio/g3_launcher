@@ -254,41 +254,41 @@ enum class G3DistancePreset : DistancePreset, Preset {
 
         override val engine = object : DistancePreset.Engine {
             override val prefetchGridCellSize = 12_000
-            override val prefetchGridCellSizeLowPoly = 34_000
-            override val dOFStart = 3000f
-            override val dOFEnd = 9000f
-            override val dOFMaxBlur = 1.0f
-            override val entityRoi = 6_000
+            override val prefetchGridCellSizeLowPoly = 15_000
+            override val dOFStart = 5000f
+            override val dOFEnd = 7000f
+            override val dOFMaxBlur = 4.0f
+            override val entityRoi = 5_000
         }
 
         override val sliders = object : DistancePreset.Sliders {
-            override val fFarClippingPlaneHigh = 8000f
-            override val fFarClippingPlaneMedium = 6000f
-            override val fFarClippingPlaneLow = 4000f
+            override val fFarClippingPlaneHigh = 18000f
+            override val fFarClippingPlaneMedium = 14000f
+            override val fFarClippingPlaneLow = 10000f
 
-            override val fFarClippingPlaneLowPolyMeshHigh = 50000f
-            override val fFarClippingPlaneLowPolyMeshMedium = 35000f
-            override val fFarClippingPlaneLowPolyMeshLow = 20000f
+            override val fFarClippingPlaneLowPolyMeshHigh = 150000f
+            override val fFarClippingPlaneLowPolyMeshMedium = 100000f
+            override val fFarClippingPlaneLowPolyMeshLow = 100000f
 
-            override val fViewDistanceVeryHigh = 5000f
-            override val fViewDistanceHigh = 4000f
-            override val fViewDistanceMedium = 3000f
-            override val fViewDistanceLow = 2000f
+            override val fViewDistanceVeryHigh = 18000f
+            override val fViewDistanceHigh = 12000f
+            override val fViewDistanceMedium = 5500f
+            override val fViewDistanceLow = 4000f
 
-            override val fScreenObjectDistanceCullingVeryHigh = 0.02f
-            override val fProcessingRangeFadeOutRangeVeryHigh = 500f
-            override val fRangedBaseLoDOffsetVeryHigh = 100f
-            override val fGlobalVisualLoDFactorVeryHigh = 0.01f
-            override val enuMeshLoDQualityStageVeryHigh = 0f
-            override val enuAnimationLoDQualityStageVeryHigh = 0f
+            override val fScreenObjectDistanceCullingVeryHigh = 0.002f
+            override val fProcessingRangeFadeOutRangeVeryHigh = 200f
+            override val fRangedBaseLoDOffsetVeryHigh = 1200f
+            override val fGlobalVisualLoDFactorVeryHigh = 1.0f
+            override val enuMeshLoDQualityStageVeryHigh = 2f
+            override val enuAnimationLoDQualityStageVeryHigh = 2f
             override val fLowPolyObjectDistanceCullingVeryHigh = 0.01f
 
-            override val fScreenObjectDistanceCullingHigh = 0.02f
-            override val fProcessingRangeFadeOutRangeHigh = 500f
-            override val fRangedBaseLoDOffsetHigh = 100f
+            override val fScreenObjectDistanceCullingHigh = 0.008f
+            override val fProcessingRangeFadeOutRangeHigh = 700f
+            override val fRangedBaseLoDOffsetHigh = 800f
             override val fGlobalVisualLoDFactorHigh = 0.01f
-            override val enuMeshLoDQualityStageHigh = 0f
-            override val enuAnimationLoDQualityStageHigh = 0f
+            override val enuMeshLoDQualityStageHigh = 2f
+            override val enuAnimationLoDQualityStageHigh = 0.01f
             override val fLowPolyObjectDistanceCullingHigh = 0.01f
 
             override val fScreenObjectDistanceCullingMedium = 0.02f

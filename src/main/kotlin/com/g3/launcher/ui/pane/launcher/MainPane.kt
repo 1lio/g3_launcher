@@ -71,6 +71,7 @@ fun ApplicationScope.MainPane(
                         .fillMaxWidth()
                         .clickable(null, null, enabled = !viewModel.gameStarted) {
                             viewModel.playGame()
+                            showOption = false
                         }
                 )
 
@@ -86,6 +87,7 @@ fun ApplicationScope.MainPane(
                             .fillMaxWidth()
                             .clickable(null, null, enabled = !viewModel.gameStarted) {
                                 viewModel.playWithMods()
+                                showOption = false
                             }
                     )
                 }

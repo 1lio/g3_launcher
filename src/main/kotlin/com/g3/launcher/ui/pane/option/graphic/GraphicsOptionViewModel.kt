@@ -34,7 +34,7 @@ class GraphicsOptionViewModel {
         currentGraphicsPreset = GameSaveManager.getGraphicsPreset()
         currentDistancePreset = GameManager.getDistancePreset()
         vSync = GameSaveManager.isVsync()
-        fpsLimit = GameSaveManager.isFpsLimit()
+        this@GraphicsOptionViewModel.fpsLimit = GameSaveManager.isFpsLimit()
     }
 
     fun setDisplayMode(mode: G3DisplayMode) {
@@ -52,13 +52,13 @@ class GraphicsOptionViewModel {
         currentDistancePreset = preset
     }
 
-    fun setVsync(value: Boolean) {
+    fun vsync(value: Boolean) {
         GameSaveManager.enableVsync(value)
         vSync = value
     }
 
-    fun setFpsLimit(value: Boolean) {
+    fun fpsLimit(value: Boolean) {
         GameSaveManager.setFpsLimit(value)
-        fpsLimit = value
+        this@GraphicsOptionViewModel.fpsLimit = value
     }
 }
