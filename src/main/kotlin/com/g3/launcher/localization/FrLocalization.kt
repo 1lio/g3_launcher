@@ -97,4 +97,6 @@ class FrLocalization : Localization {
     override val resetMultipliersDescription: String = "Les valeurs seront rétablies à leur valeur par défaut"
     override val extendedContent: String = "Contenu étendu"
     override val restoredContentDescription: String = "Ce paramètre active ou désactive le contenu supplémentaire que l'équipe de Community Patch a créé ou restauré à partir des fichiers du jeu. Ce contenu était à l'origine dans le jeu mais n'a pas été activé par les développeurs de Piranha Bytes pour diverses raisons. Une nouvelle partie doit être démarrée."
+    override val alternativeAI: String = "IA Alternative"
+    override val alternativeAIDescription: String = "Rend les ennemis agressifs et tactiques : ils contournent, encerclent, utilisent activement les attaques à distance et les blocages. Il est mieux adapté pour l'arène et les batailles ciblées, transformant les escarmouches en tests tactiques difficiles. Cependant, dans le monde ouvert, une telle agressivité et difficulté accrue peuvent être excessives pour l'exploration et l'histoire."
 }

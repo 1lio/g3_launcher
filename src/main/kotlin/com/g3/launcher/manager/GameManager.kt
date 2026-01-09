@@ -106,14 +106,6 @@ object GameManager {
         return value == "1"
     }
 
-
-    // [Game]
-    // MinHitDuration=6
-    // AIMode=true
-    // XPModifier=100
-    // QuestXPModifier=100
-
-
     fun setGFont(enabled: Boolean) {
         IniFileManager.updateValue(
             filePath = g3Path,
@@ -137,6 +129,60 @@ object GameManager {
             key = "GUI.DefaultFont",
         )
         return value == "Gothic3"
+    }
+
+    fun setHintAttackDuration(value: Int) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "MinHitDuration",
+            newValue = value.toString()
+        )
+    }
+
+    fun getHintAttackDuration(): Int {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "MinHitDuration",
+        )
+        return value?.toIntOrNull() ?: 6
+    }
+
+    fun setCombatExp(value: Int) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "XPModifier",
+            newValue = value.toString()
+        )
+    }
+
+    fun getCombatExp(): Int {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "XPModifier",
+        )
+        return value?.toIntOrNull() ?: 6
+    }
+
+    fun setQuestExp(value: Int) {
+        IniFileManager.updateValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "QuestXPModifier",
+            newValue = value.toString()
+        )
+    }
+
+    fun getQuestExp(): Int {
+        val value = IniFileManager.readValue(
+            filePath = g3Path,
+            section = "Game",
+            key = "QuestXPModifier",
+        )
+        return value?.toIntOrNull() ?: 6
     }
 
     fun useRuIntro(enabled: Boolean) {

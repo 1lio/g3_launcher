@@ -183,6 +183,24 @@ object GameSaveManager {
         return value == "true"
     }
 
+    fun setAltAI(value: Boolean) {
+        IniFileManager.updateValue(
+            filePath = path,
+            section = "Options.Difficulty",
+            key = "AIMode",
+            newValue = value.toString()
+        )
+    }
+
+    fun isAltAI(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = path,
+            section = "Options.Difficulty",
+            key = "AIMode",
+        )
+        return value == "true"
+    }
+
     fun setPreset(preset: GraphicsPreset) {
         IniFileManager.updateValue(
             filePath = path,

@@ -1,6 +1,7 @@
 package com.g3.launcher.ui.pane.option.game
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.g3.launcher.manager.GameManager
@@ -29,6 +30,17 @@ class GameOptionViewModel {
     var altCamera: Boolean by mutableStateOf(GameSaveManager.isAltCamera())
         private set
 
+    var altAI: Boolean by mutableStateOf(GameSaveManager.isAltAI())
+        private set
+
+    var combatExp: Int by mutableStateOf(GameManager.getCombatExp())
+        private set
+
+    var questExp: Int by mutableStateOf(GameManager.getQuestExp())
+        private set
+
+    var attackDuration: Int by mutableIntStateOf(GameManager.getHintAttackDuration())
+        private set
 
     fun updateSettingsType(mods: Boolean) {
         GameManager.setGameMode(mods)
@@ -41,6 +53,10 @@ class GameOptionViewModel {
         lockGame = GameManager.isLockGame()
         extendedContent = GameManager.isExtendedContent()
         altCamera = GameSaveManager.isAltCamera()
+        altAI = GameSaveManager.isAltAI()
+        attackDuration = GameManager.getHintAttackDuration()
+        combatExp = GameManager.getCombatExp()
+        questExp = GameManager.getQuestExp()
     }
 
     fun testMode(value: Boolean) {
@@ -77,5 +93,73 @@ class GameOptionViewModel {
     fun enableAltCamera(value: Boolean) {
         GameSaveManager.setAltCamera(value)
         altCamera = value
+    }
+
+    fun enableAltAI(value: Boolean) {
+        GameSaveManager.setAltAI(value)
+        altAI = value
+    }
+
+    fun setCombatExp(value: String) {
+        if (value.isEmpty()) return
+
+        var result = value
+            .replace(Regex("[^0-9]"), "")
+            .toInt()
+
+        if (result > 200) {
+            result = 200
+        }
+
+        if (result < 1) {
+            result = 1
+        }
+
+        GameManager.setCombatExp(result)
+        combatExp = result
+    }
+
+    fun setQuestExp(value: String) {
+        if (value.isEmpty()) return
+
+        var result = value
+            .replace(Regex("[^0-9]"), "")
+            .toInt()
+
+        if (result > 200) {
+            result = 200
+        }
+
+        if (result < 1) {
+            result = 1
+        }
+
+        GameManager.setQuestExp(result)
+        questExp = result
+    }
+
+    fun setAttackDuration(value: String) {
+        if (value.isEmpty()) return
+
+        var result = value
+            .replace(Regex("[^0-9]"), "")
+            .toInt()
+
+        if (result > 15) {
+            result = 15
+        }
+
+        if (result < 1) {
+            result = 1
+        }
+
+        GameManager.setHintAttackDuration(result)
+        attackDuration = result
+    }
+
+    fun resetBalance() {
+        setAttackDuration("6")
+        setCombatExp("100")
+        setQuestExp("100")
     }
 }

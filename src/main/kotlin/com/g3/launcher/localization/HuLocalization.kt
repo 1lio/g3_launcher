@@ -97,5 +97,6 @@ class HuLocalization : Localization {
     override val resetMultipliersDescription: String = "Az értékek visszaállnak az alapértelmezettre"
     override val extendedContent: String = "Kiterjesztett tartalom"
     override val restoredContentDescription: String = "Ez a paraméter engedélyezi vagy letiltja a további tartalmat, amelyet a Community Patch csapat készített vagy helyreállított a játékfájlokból. Ez a tartalom eredetileg a játékban volt, de a Piranha Bytes fejlesztők különböző okok miatt nem aktiválták. Új játékot kell kezdeni."
-
+    override val alternativeAI: String = "Alternatív MI"
+    override val alternativeAIDescription: String = "Az ellenségeket agresszívvé és taktikaivá teszi: megkerülik, körbeveszik, aktívan használnak távolsági támadásokat és blokkolásokat. Jobban alkalmas arénához és célzott csatákhoz, összecsapásokat kihívásokkal teli taktikai próbává változtatva. Azonban a nyílt világban az ilyen agresszivitás és megnövekedett nehézség lehet túlzott a felfedezéshez és történethez."
 }

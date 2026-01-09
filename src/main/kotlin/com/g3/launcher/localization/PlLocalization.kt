@@ -97,4 +97,6 @@ class PlLocalization : Localization {
     override val resetMultipliersDescription: String = "Wartości zostaną przywrócone do domyślnych"
     override val extendedContent: String = "Rozszerzona zawartość"
     override val restoredContentDescription: String = "Ten parametr włącza lub wyłącza dodatkową zawartość, którą zespół Community Patch stworzył lub przywrócił z plików gry. Ta zawartość była pierwotnie w grze, ale z różnych powodów nie została aktywowana przez deweloperów Piranha Bytes. Należy rozpocząć nową grę."
+    override val alternativeAI: String = "Alternatywna SI"
+    override val alternativeAIDescription: String = "Czyni wrogów agresywnymi i taktycznymi: oskrzydlają, otaczają, aktywnie używają ataków dystansowych i bloków. Lepiej nadaje się do areny i ukierunkowanych bitew, zamieniając potyczki w wymagające próby taktyczne. Jednak w otwartym świecie taka agresja i podwyższony poziom trudności mogą być nadmierne dla eksploracji i fabuły."
 }

@@ -97,4 +97,6 @@ class CzLocalization : Localization {
     override val resetMultipliersDescription: String = "Hodnoty budou resetovány na výchozí"
     override val extendedContent: String = "Rozšířený obsah"
     override val restoredContentDescription: String = "Tento parametr povoluje nebo zakazuje dodatečný obsah, který tým Community Patch vytvořil nebo obnovil z herních souborů. Tento obsah byl původně ve hře, ale z různých důvodů nebyl aktivován vývojáři Piranha Bytes. Je nutné začít novou hru."
+    override val alternativeAI: String = "Alternativní AI"
+    override val alternativeAIDescription: String = "Dělá nepřátele agresivními a taktickými: obcházejí, obklopují, aktivně využívají dálkové útoky a blokování. Je vhodnější pro arénu a cílené bitvy, mění potyčky v náročné taktické zkoušky. V otevřeném světě však může být taková agresivita a zvýšená obtížnost pro průzkum a příběh nadměrná."
 }

@@ -97,4 +97,6 @@ class TrcLocalization : Localization {
     override val resetMultipliersDescription: String = "數值將恢復為預設值"
     override val extendedContent: String = "擴展內容"
     override val restoredContentDescription: String = "此參數啟用或停用 Community Patch 團隊從遊戲文件中創建或恢復的額外內容。此內容最初在遊戲中，但由於各種原因未被 Piranha Bytes 開發者啟用。必須開始新遊戲。"
+    override val alternativeAI: String = "替代人工智慧"
+    override val alternativeAIDescription: String = "使敵人更具攻擊性和戰術性：他們會側翼包抄、包圍、積極使用遠程攻擊和格擋。它更適合競技場和專注的戰鬥，將小規模衝突轉變為具有挑戰性的戰術考驗。然而，在開放世界中，這種攻擊性和增加的難度對於探索和故事可能過於極端。"
 }

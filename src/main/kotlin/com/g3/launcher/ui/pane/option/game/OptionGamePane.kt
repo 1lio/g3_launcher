@@ -67,6 +67,13 @@ fun OptionGamePane(
                 checked = viewModel.altCamera,
                 onCheckedChange = viewModel::enableAltCamera
             )
+
+            OptionCheckBox(
+                text = strings.alternativeAI,
+                description = strings.alternativeAIDescription,
+                checked = viewModel.altAI,
+                onCheckedChange = viewModel::enableAltAI
+            )
         }
 
         Spacer(Modifier.height(40.dp))
@@ -90,28 +97,28 @@ fun OptionGamePane(
             OptionEditItem(
                 text = strings.questExperienceMultiplier,
                 description = strings.questExperienceMultiplierDescription,
-                value = "100%",
-                onValueChange = {},
+                value = "${viewModel.questExp}%",
+                onValueChange = viewModel::setQuestExp,
             )
 
             OptionEditItem(
                 text = strings.combatExperienceMultiplier,
                 description = strings.combatExperienceMultiplierDescription,
-                value = "100%",
-                onValueChange = {},
+                value = "${viewModel.combatExp}%",
+                onValueChange = viewModel::setCombatExp,
             )
 
             OptionEditItem(
                 text = strings.mobAttackDelay,
                 description = strings.mobAttackDelayDescription,
-                value = "6",
-                onValueChange = {},
+                value = viewModel.attackDuration.toString(),
+                onValueChange = viewModel::setAttackDuration,
             )
 
             OptionItem(
                 text = strings.resetMultipliers,
                 description = strings.resetMultipliersDescription,
-                onClick = {}
+                onClick = viewModel::resetBalance
             )
         }
 

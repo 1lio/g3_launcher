@@ -49,6 +49,10 @@ fun OptionEditItem(
         fontSize = 18.sp,
     )
 
+    LaunchedEffect(value) {
+        currentValue = value
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

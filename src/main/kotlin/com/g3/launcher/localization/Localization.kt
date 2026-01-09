@@ -108,4 +108,6 @@ interface Localization {
     val resetMultipliersDescription: String
     val extendedContent: String
     val restoredContentDescription: String
+    val alternativeAI: String
+    val alternativeAIDescription: String
 }
