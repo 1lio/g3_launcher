@@ -99,4 +99,8 @@ class CzLocalization : Localization {
     override val restoredContentDescription: String = "Tento parametr povoluje nebo zakazuje dodatečný obsah, který tým Community Patch vytvořil nebo obnovil z herních souborů. Tento obsah byl původně ve hře, ale z různých důvodů nebyl aktivován vývojáři Piranha Bytes. Je nutné začít novou hru."
     override val alternativeAI: String = "Alternativní AI"
     override val alternativeAIDescription: String = "Dělá nepřátele agresivními a taktickými: obcházejí, obklopují, aktivně využívají dálkové útoky a blokování. Je vhodnější pro arénu a cílené bitvy, mění potyčky v náročné taktické zkoušky. V otevřeném světě však může být taková agresivita a zvýšená obtížnost pro průzkum a příběh nadměrná."
+    override val displayMode: String = "Režim zobrazení"
+    override val windowed: String = "V okně"
+    override val borderlessWindow: String = "Okno bez okraje"
+    override val fullscreen: String = "Celá obrazovka"
 }

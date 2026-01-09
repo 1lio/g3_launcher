@@ -123,8 +123,10 @@ interface DistancePreset {
 }
 
 @Immutable
-enum class G3DistancePreset : DistancePreset {
+enum class G3DistancePreset : DistancePreset, Preset {
     Default {
+        override val key: String = "default"
+
         override val engine = object : DistancePreset.Engine {
             override val prefetchGridCellSize = 10_000
             override val prefetchGridCellSizeLowPoly = 34_000
@@ -248,6 +250,8 @@ enum class G3DistancePreset : DistancePreset {
     },*/
 
     Medium {
+        override val key: String = "medium"
+
         override val engine = object : DistancePreset.Engine {
             override val prefetchGridCellSize = 12_000
             override val prefetchGridCellSizeLowPoly = 34_000
@@ -306,6 +310,8 @@ enum class G3DistancePreset : DistancePreset {
     },
 
     High {
+        override val key: String = "high"
+
         override val engine = object : DistancePreset.Engine {
             override val prefetchGridCellSize = 16000
             override val prefetchGridCellSizeLowPoly = 34000

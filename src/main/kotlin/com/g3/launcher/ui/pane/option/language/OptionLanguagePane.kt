@@ -192,6 +192,7 @@ private fun LanguageSelector(
                             color = if (language.title == selectedLanguage.title) ColorOrange else Color.White,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
+                            hoverable = true,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .wrapContentHeight()

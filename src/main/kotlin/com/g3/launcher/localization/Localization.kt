@@ -110,4 +110,8 @@ interface Localization {
     val restoredContentDescription: String
     val alternativeAI: String
     val alternativeAIDescription: String
+    val displayMode: String
+    val windowed: String
+    val borderlessWindow: String
+    val fullscreen: String
 }

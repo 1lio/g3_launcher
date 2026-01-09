@@ -1,7 +1,9 @@
 package com.g3.launcher.manager
 
 import com.g3.launcher.model.DistancePreset
+import com.g3.launcher.model.G3DistancePreset
 import com.g3.launcher.model.G3Language
+import com.g3.launcher.model.Preset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -412,6 +414,18 @@ object GameManager {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun getDistancePreset(): G3DistancePreset {
+        val preset = getCurrentPreset()
+        val size = preset.engine.prefetchGridCellSize
+
+        return when (size) {
+            10000 -> G3DistancePreset.Default
+            12000 -> G3DistancePreset.Medium
+            16000 -> G3DistancePreset.High
+            else -> G3DistancePreset.Default
         }
     }
 }

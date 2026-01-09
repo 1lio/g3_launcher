@@ -1,5 +1,6 @@
 package com.g3.launcher.manager
 
+import com.g3.launcher.model.G3DisplayMode
 import com.g3.launcher.model.G3GraphicPreset
 import com.g3.launcher.model.G3Language
 import com.g3.launcher.model.GraphicsPreset
@@ -88,7 +89,7 @@ object GameSaveManager {
             else -> G3GraphicPreset.VeryHigh
         }
 
-        setPreset(preset)
+        setGraphicsPreset(preset)
     }
 
     fun setTextLanguage(lang: G3Language): Boolean {
@@ -155,6 +156,14 @@ object GameSaveManager {
         )
     }
 
+    fun isVsync(): Boolean {
+        return IniFileManager.readValue(
+            filePath = path,
+            section = "Options.Video",
+            key = "VSync",
+        )?.toBoolean() ?: false
+    }
+
     fun setFpsLimit(value: Boolean) {
         IniFileManager.updateValue(
             filePath = path,
@@ -163,6 +172,17 @@ object GameSaveManager {
             newValue = if (value) "60" else "${DeviceManager.FRAME_RATE}"
         )
         enableVsync(true)
+    }
+
+    fun isFpsLimit(): Boolean {
+        val value = IniFileManager.readValue(
+            filePath = path,
+            section = "Options.Video",
+            key = "RefreshRate",
+        )?.toIntOrNull() ?: 60
+
+        val rate = value == 60
+        return rate && isVsync()
     }
 
     fun setAltCamera(value: Boolean) {
@@ -201,7 +221,36 @@ object GameSaveManager {
         return value == "true"
     }
 
-    fun setPreset(preset: GraphicsPreset) {
+    fun setDisplayMode(mode: G3DisplayMode) {
+        val value = when (mode) {
+            G3DisplayMode.Windowed -> 0
+            G3DisplayMode.BorderlessWindow -> 1
+            G3DisplayMode.Fullscreen -> 2
+        }
+
+        IniFileManager.updateValue(
+            filePath = path,
+            section = "Options.Video",
+            key = "WindowMode",
+            newValue = value.toString()
+        )
+    }
+
+    fun getDisplayMode(): G3DisplayMode {
+        val value = IniFileManager.readValue(
+            filePath = path,
+            section = "Options.Video",
+            key = "WindowMode",
+        )?.toIntOrNull() ?: 2
+
+        return when (value) {
+            0 -> G3DisplayMode.Windowed
+            1 -> G3DisplayMode.BorderlessWindow
+            else -> G3DisplayMode.Fullscreen
+        }
+    }
+
+    fun setGraphicsPreset(preset: GraphicsPreset) {
         IniFileManager.updateValue(
             filePath = path,
             section = "Options.Details",
@@ -290,7 +339,7 @@ object GameSaveManager {
 
     }
 
-    fun getPreset(): G3GraphicPreset {
+    fun getGraphicsPreset(): G3GraphicPreset {
         val value = IniFileManager.readValue(
             filePath = path,
             section = "Options.Details",

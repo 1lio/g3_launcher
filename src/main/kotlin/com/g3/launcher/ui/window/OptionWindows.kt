@@ -33,6 +33,7 @@ import com.g3.launcher.ui.component.MainBox
 import com.g3.launcher.ui.component.option.OptionCheckBox
 import com.g3.launcher.ui.component.option.OptionTabSelector
 import com.g3.launcher.ui.pane.option.game.OptionGamePane
+import com.g3.launcher.ui.pane.option.graphic.OptionGraphicsPane
 import com.g3.launcher.ui.pane.option.language.OptionLanguagePane
 import com.g3.launcher.ui.pane.option.other.OtherOptionPane
 import org.jetbrains.compose.resources.painterResource
@@ -53,7 +54,10 @@ fun ApplicationScope.OptionWindows(
         MainBox(
             backgroundRes = Res.drawable.bg_options,
             backgroundPosition = BgPosition.Bottom,
-            onClose = onClose,
+            onClose = {
+                onClose()
+                WindowManager.optionsWindow = null
+            },
         ) {
             Column(
                 modifier = Modifier.align(alignment = Alignment.TopCenter)
@@ -95,7 +99,7 @@ fun ApplicationScope.OptionWindows(
                 ) {
                     when (tabIndex) {
                         0 -> OptionLanguagePane()
-                        1 -> {}
+                        1 -> OptionGraphicsPane()
                         2 -> OptionGamePane()
                         3 -> OtherOptionPane()
                         else -> {}

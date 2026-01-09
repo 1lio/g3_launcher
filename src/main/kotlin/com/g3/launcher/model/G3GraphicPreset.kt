@@ -31,7 +31,7 @@ enum class G3GraphicPreset(
     override val antialiasing: String,
     override val noise: String,
     override val feedback: String
-) : GraphicsPreset {
+) : GraphicsPreset, Preset {
     Low(
         "1",
         "1",
@@ -46,7 +46,9 @@ enum class G3GraphicPreset(
         "0",
         "0",
         "0",
-    ),
+    ){
+        override val key: String = "low"
+    },
     Medium(
         "2",
         "2",
@@ -61,7 +63,9 @@ enum class G3GraphicPreset(
         "0",
         "0",
         "0",
-    ),
+    ){
+        override val key: String = "medium"
+    },
     High(
         "3",
         "3",
@@ -76,7 +80,9 @@ enum class G3GraphicPreset(
         "0",
         "0",
         "0",
-    ),
+    ){
+        override val key: String = "high"
+    },
     VeryHigh(
         "3",
         "3",
@@ -91,7 +97,9 @@ enum class G3GraphicPreset(
         "1",
         "1",
         "1",
-    ),
+    ){
+        override val key: String = "veryHigh"
+    },
 }
 
 class Custom : GraphicsPreset {

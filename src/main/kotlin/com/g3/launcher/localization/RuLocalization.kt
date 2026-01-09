@@ -99,4 +99,8 @@ class RuLocalization : Localization {
     override val restoredContentDescription: String = "Этот параметр включает или отключает дополнительный контент, который команда Community Patch создала или восстановила из файлов игры. Этот контент изначально был в игре, но по разным причинам не был активирован разработчиками Piranha Bytes. Необходимо начать новую игру."
     override val alternativeAI: String = "Альтернативный ИИ"
     override val alternativeAIDescription: String = "Делает врагов агрессивными и тактичными: они обходят, окружают, активно используют дальние атаки и блокировки. Он лучше подходит для арены и целенаправленных сражений, превращая схватки в сложное тактическое испытание. Однако в открытом мире такая агрессия и повышенная сложность могут быть чрезмерными для исследования и сюжета."
+    override val displayMode: String = "Режим отображения"
+    override val windowed: String = "В окне"
+    override val borderlessWindow: String = "В окне (без рамки)"
+    override val fullscreen: String = "Полный экран"
 }

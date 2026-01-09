@@ -99,4 +99,8 @@ class HuLocalization : Localization {
     override val restoredContentDescription: String = "Ez a paraméter engedélyezi vagy letiltja a további tartalmat, amelyet a Community Patch csapat készített vagy helyreállított a játékfájlokból. Ez a tartalom eredetileg a játékban volt, de a Piranha Bytes fejlesztők különböző okok miatt nem aktiválták. Új játékot kell kezdeni."
     override val alternativeAI: String = "Alternatív MI"
     override val alternativeAIDescription: String = "Az ellenségeket agresszívvé és taktikaivá teszi: megkerülik, körbeveszik, aktívan használnak távolsági támadásokat és blokkolásokat. Jobban alkalmas arénához és célzott csatákhoz, összecsapásokat kihívásokkal teli taktikai próbává változtatva. Azonban a nyílt világban az ilyen agresszivitás és megnövekedett nehézség lehet túlzott a felfedezéshez és történethez."
+    override val displayMode: String = "Megjelenítési mód"
+    override val windowed: String = "Ablakban"
+    override val borderlessWindow: String = "Keret nélküli ablak"
+    override val fullscreen: String = "Teljes képernyő"
 }

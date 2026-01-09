@@ -100,4 +100,9 @@ class EnLocalization : Localization {
     override val restoredContentDescription: String = "This parameter enables or disables additional content that the Community Patch team created or restored from the game files. This content was originally in the game but was not activated by Piranha Bytes developers for various reasons. A new game must be started."
     override val alternativeAI: String = "Alternative AI"
     override val alternativeAIDescription: String = "Makes enemies aggressive and tactical: they flank, surround, actively use ranged attacks and blocking. It is better suited for arena and focused battles, turning skirmishes into challenging tactical tests. However, in the open world, such aggression and increased difficulty may be excessive for exploration and story."
+    override val displayMode: String = "Display mode"
+    override val windowed: String = "Windowed"
+    override val borderlessWindow: String = "Borderless window"
+    override val fullscreen: String = "Fullscreen"
+
 }

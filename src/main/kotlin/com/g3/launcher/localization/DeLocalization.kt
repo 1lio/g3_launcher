@@ -99,4 +99,8 @@ class DeLocalization : Localization {
     override val restoredContentDescription: String = "Dieser Parameter aktiviert oder deaktiviert zusätzliche Inhalte, die das Community Patch-Team erstellt oder aus den Spiel-Dateien wiederhergestellt hat. Diese Inhalte waren ursprünglich im Spiel, wurden aber aus verschiedenen Gründen von den Piranha Bytes-Entwicklern nicht aktiviert. Ein neues Spiel muss gestartet werden."
     override val alternativeAI: String = "Alternative KI"
     override val alternativeAIDescription: String = "Macht Gegner aggressiv und taktisch: sie flankieren, umzingeln, nutzen aktiv Fernangriffe und Blocks. Es eignet sich besser für Arena und fokussierte Kämpfe und verwandelt Scharmützel in herausfordernde taktische Prüfungen. In der offenen Welt können solche Aggressivität und erhöhte Schwierigkeit jedoch für Erkundung und Geschichte übertrieben sein."
+    override val displayMode: String = "Anzeigemodus"
+    override val windowed: String = "Fenster"
+    override val borderlessWindow: String = "Randloses Fenster"
+    override val fullscreen: String = "Vollbild"
 }

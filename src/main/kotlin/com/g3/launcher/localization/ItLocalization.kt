@@ -99,4 +99,8 @@ class ItLocalization : Localization {
     override val restoredContentDescription: String = "Questo parametro abilita o disabilita contenuti aggiuntivi che il team di Community Patch ha creato o ripristinato dai file di gioco. Questo contenuto era originariamente nel gioco ma non è stato attivato dagli sviluppatori di Piranha Bytes per vari motivi. È necessario iniziare una nuova partita."
     override val alternativeAI: String = "IA Alternativa"
     override val alternativeAIDescription: String = "Rende i nemici aggressivi e tattici: aggirano, circondano, usano attivamente attacchi a distanza e blocchi. È più adatto per l'arena e battaglie focalizzate, trasformando gli scontri in impegnative prove tattiche. Tuttavia, nel mondo aperto, tale aggressività e difficoltà aumentata possono essere eccessive per l'esplorazione e la trama."
+    override val displayMode: String = "Modalità visualizzazione"
+    override val windowed: String = "Finestrato"
+    override val borderlessWindow: String = "Finestra senza bordi"
+    override val fullscreen: String = "Schermo intero"
 }
