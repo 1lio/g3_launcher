@@ -61,8 +61,15 @@ object GitHubManager {
     }
 
     private fun compareVersions(latestVersion: String): Int {
-        val currentParts = Constants.LAUNCHER_VERSION.split(".").map { it.toIntOrNull() ?: 0 }
-        val latestParts = latestVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        val currentParts = Constants.LAUNCHER_VERSION
+            .replace("v", "")
+            .split(".")
+            .map { it.toIntOrNull() ?: 0 }
+
+        val latestParts = latestVersion
+            .replace("v", "")
+            .split(".")
+            .map { it.toIntOrNull() ?: 0 }
 
         for (i in 0 until maxOf(currentParts.size, latestParts.size)) {
             val current = currentParts.getOrElse(i) { 0 }
