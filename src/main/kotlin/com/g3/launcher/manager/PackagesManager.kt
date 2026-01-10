@@ -9,46 +9,124 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import kotlin.math.roundToInt
 
 /**
  * Работа с пакетами установки
  */
 object PackagesManager {
-    private const val BASE_URL = "https://github.com/1lio/g3_launcher/releases/download/$LAUNCHER_VERSION"
 
-    private const val BASE_PATH: String = "app/resources/base.zip"
-    private const val EN_PATH: String = "app/resources/en.zip"
-    private const val DE_PATH: String = "app/resources/de.zip"
-    private const val FR_PATH: String = "app/resources/fr.zip"
-    private const val PL_PATH: String = "app/resources/pl.zip"
-    private const val RU_PATH: String = "app/resources/ru.zip"
+    sealed class Package(val key: String, val path: String, val length: Long, val countFiles: Int) {
+        object Base : Package("base", "app/resources/base.zip", 1843983914L, 55)
+        object En : Package("en", "app/resources/en.zip", 616635412L, 1)
+        object De : Package("de", "app/resources/de.zip", 624737587L, 1)
+        object Fr : Package("fr", "app/resources/fr.zip", 609685604L, 1)
+        object Pl : Package("pl", "app/resources/pl.zip", 916613129L, 1)
+        object Ru : Package("ru", "app/resources/ru.zip", 1364683928L, 2)
+    }
+
+    private const val BASE_URL: String = "https://github.com/1lio/g3_launcher/releases/download/$LAUNCHER_VERSION"
+
+    private val PACKAGES = listOf(
+        Package.Base,
+        Package.En,
+        Package.De,
+        Package.Fr,
+        Package.Pl,
+        Package.Ru,
+    )
+
+    fun getAvailablePackages(): List<String> {
+        return buildList {
+            PACKAGES.forEach {
+                if (verifyPackage(it.key)) {
+                    add(it.key)
+                }
+            }
+        }
+    }
+
+    fun verifyPackage(key: String): Boolean {
+        val pack = PACKAGES.find { it.key == key } ?: return false
+        val file = File(pack.path)
+        return file.exists() && file.length() == pack.length
+    }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
     private val baseMutex = Mutex()
     private val languageMutexes = mutableMapOf<String, Mutex>() // Язык -> Mutex
-
     private val downloadJobs = mutableMapOf<String, Job>()
     private val downloadCallbacks = mutableMapOf<String, MutableList<(Int) -> Unit>>()
 
-    fun startLanguageDownload(language: String, onProgress: (Int) -> Unit) {
+    suspend fun downloadBasePackage(onProgress: suspend (Int) -> Unit) {
+        val downloadUrl = "$BASE_URL/base.zip"
+        val pack = Package.Base
+
+        if (verifyPackage(pack.key)) {
+            onProgress(100)
+            return
+        }
+
+        baseMutex.withLock {
+            try {
+                val targetFile = File(pack.path)
+                downloadLargeFileWithResume(
+                    url = downloadUrl,
+                    targetFile = targetFile,
+                    onProgress = onProgress
+                )
+            } catch (e: Exception) {
+                println("Ошибка при загрузке base.zip: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    suspend fun extractBasePackage(
+        gameDirPath: String,
+        onProgress: suspend (percent: Int, count: Int, total: Int) -> Unit
+    ) {
+        val gameDir = File(gameDirPath)
+        if (!gameDir.exists()) return
+
+        try {
+            val pack = Package.Base
+            val file = File(pack.path)
+            file.inputStream().use { input ->
+                extractZipArchive(
+                    inputStream = input,
+                    outputDir = gameDir,
+                    totalFiles = pack.countFiles,
+                    totalBytes = pack.length,
+                    onProgress = onProgress,
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
+    }
+
+    fun downloadLocalization(language: String, onProgress: (Int) -> Unit) {
         val callbacks = downloadCallbacks.getOrPut(language) { mutableListOf() }
         callbacks.add(onProgress)
 
-        // Если загрузка уже идёт → просто добавили колбек, не создаём новый Job
         if (downloadJobs[language]?.isActive == true) return
 
         val job = scope.launch {
-            installLanguagePackage(language) { progress ->
+            downloadLanguagePackage(language) { progress ->
                 // уведомляем всех подписчиков
                 downloadCallbacks[language]?.forEach { it(progress) }
             }
@@ -62,115 +140,43 @@ object PackagesManager {
         downloadJobs[language] = job
     }
 
+    suspend fun extractLocalizationPackage(
+        localizationKey: String,
+        gameDirPath: String,
+        onProgress: suspend (percent: Int, count: Int, total: Int) -> Unit
+    ) {
+        val gameDir = File(gameDirPath)
+        if (!gameDir.exists()) return
+
+        try {
+            val pack = PACKAGES.find { it.key == localizationKey  } ?: return
+            val file = File(pack.path)
+            file.inputStream().use { input ->
+                extractZipArchive(
+                    inputStream = input,
+                    outputDir = gameDir,
+                    totalFiles = pack.countFiles,
+                    totalBytes = pack.length,
+                    onProgress = onProgress,
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
+    }
+
     fun stopDownload(language: String) {
         downloadJobs[language]?.cancel()
         downloadJobs.remove(language)
         downloadCallbacks.remove(language)
     }
 
-    fun getLocalProgress(language: String): Int {
-        val path = when (language) {
-            "en" -> EN_PATH
-            "de" -> DE_PATH
-            "fr" -> FR_PATH
-            "pl" -> PL_PATH
-            "ru" -> RU_PATH
-            else -> return 0
-        }
-
-        val file = File(path)
-        if (!file.exists()) return 0
-
-        val total = runBlocking { getFileSize("$BASE_URL/$language.zip") } ?: return 0
-        if (total == 0L) return 0
-
-        return ((file.length().toFloat() / total) * 100).toInt().coerceIn(0, 99)
-    }
-
-    fun isDownloading(language: String): Boolean {
-        return downloadJobs[language]?.isActive == true
-    }
-
-    fun resumeIfNeeded(language: String, onProgress: (Int) -> Unit) {
-        if (isDownloading(language)) return
-
-        val progress = getLocalProgress(language)
-        if (progress in 1..99) {
-            println("Resuming download for $language ($progress%)")
-            startLanguageDownload(language, onProgress)
-        }
-    }
-
-    fun getAvailablePackages(): List<String> {
-        val list = mutableListOf<String>()
-
-        if (File(BASE_PATH).exists()) {
-            list.add("base")
-        }
-
-        if (File(EN_PATH).exists()) {
-            list.add("en")
-        }
-
-        if (File(DE_PATH).exists()) {
-            list.add("de")
-        }
-
-        if (File(FR_PATH).exists()) {
-            list.add("fr")
-        }
-
-        if (File(PL_PATH).exists()) {
-            list.add("pl")
-        }
-
-        if (File(RU_PATH).exists()) {
-            list.add("ru")
-        }
-
-        return list
-    }
-
-    suspend fun installBasePackage(onProgress: (Int) -> Unit = {}): Int {
-        val downloadUrl = "$BASE_URL/base.zip"
-        return baseMutex.withLock {
-            val targetFile = File(BASE_PATH)
-
-            // Проверяем существование файла и его целостность
-            if (targetFile.exists() && targetFile.length() > 0) {
-                if (verifyFileIntegrity(BASE_PATH, getFileSize(downloadUrl))) {
-                    return@withLock 100
-                }
-            }
-
-            try {
-                targetFile.parentFile?.mkdirs()
-                println("Начинаем загрузку base.zip из: $downloadUrl")
-                downloadLargeFileWithResume(downloadUrl, targetFile, onProgress)
-
-                return if (targetFile.exists() && targetFile.length() > 0) {
-                    println("base.zip успешно загружен (${targetFile.length() / 1024 / 1024} MB)")
-                    100
-                } else {
-                    0
-                }
-            } catch (e: Exception) {
-                println("Ошибка при загрузке base.zip: ${e.message}")
-                e.printStackTrace()
-                return@withLock 0
-            }
-        }
-    }
-
-    suspend fun installLanguagePackage(language: String, onProgress: (Int) -> Unit = {}): Int {
-        val filePath = when (language.lowercase()) {
-            "en" -> EN_PATH
-            "de" -> DE_PATH
-            "fr" -> FR_PATH
-            "pl" -> PL_PATH
-            "ru" -> RU_PATH
-            else -> throw IllegalArgumentException("Неподдерживаемый язык: $language")
-        }
+    private suspend fun downloadLanguagePackage(
+        language: String,
+        onProgress: suspend (Int) -> Unit = {}
+    ): Int {
+        val filePath = PACKAGES.find { it.key == language }?.path ?: return 0
 
         val languageMutex = languageMutexes.getOrPut(language) { Mutex() }
 
@@ -209,7 +215,7 @@ object PackagesManager {
     private suspend fun downloadLargeFileWithResume(
         url: String,
         targetFile: File,
-        onProgress: (Int) -> Unit = {}
+        onProgress: suspend (Int) -> Unit = {}
     ) {
         var downloadedBytes = 0L
         val totalBytes = getFileSize(url) // Пытаемся получить размер
@@ -263,8 +269,6 @@ object PackagesManager {
         } finally {
             connection.disconnect()
         }
-
-        connection.disconnect()
     }
 
     /**
@@ -289,25 +293,6 @@ object PackagesManager {
         }
     }
 
-    suspend fun verify(arch: String): Boolean {
-        if (!LauncherManager.config.packages.contains(arch)) {
-            return false
-        }
-
-        val url = "$BASE_URL/${arch}.zip"
-        val size = getFileSize(url)
-        val filePath = when (arch) {
-            "base" -> BASE_PATH
-            "en" -> EN_PATH
-            "de" -> DE_PATH
-            "fr" -> FR_PATH
-            "pl" -> PL_PATH
-            "ru" -> RU_PATH
-            else -> return false
-        }
-
-        return verifyFileIntegrity(filePath, size)
-    }
 
     /**
      * Проверяет целостность скачанного файла
@@ -327,32 +312,60 @@ object PackagesManager {
         }
     }
 
+    private suspend fun extractZipArchive(
+        inputStream: InputStream,
+        outputDir: File,
+        totalFiles: Int,
+        totalBytes: Long,
+        onProgress: suspend (percent: Int, extractedFiles: Int, totalFiles: Int) -> Unit
+    ) {
+        val buffer = ByteArray(64 * 1024) // 64 KB — оптимально
+
+        var extractedBytes = 0L
+        var extractedFiles = 0
+        var lastPercent = -1
+
+        ZipInputStream(BufferedInputStream(inputStream)).use { zis ->
+            var entry: ZipEntry?
+
+            while (zis.nextEntry.also { entry = it } != null) {
+                val e = entry ?: continue
+                val outFile = File(outputDir, e.name)
+
+                if (e.isDirectory) {
+                    outFile.mkdirs()
+                    continue
+                }
+
+                outFile.parentFile?.mkdirs()
+
+                FileOutputStream(outFile).use { fos ->
+                    var read: Int
+                    while (zis.read(buffer).also { read = it } > 0) {
+                        fos.write(buffer, 0, read)
+
+                        extractedBytes += read
+                        val percent = ((extractedBytes * 100) / totalBytes).toInt()
+
+                        if (percent != lastPercent) {
+                            lastPercent = percent
+                            onProgress(
+                                percent.coerceIn(0, 100),
+                                extractedFiles,
+                                totalFiles
+                            )
+                        }
+                    }
+                }
+                extractedFiles++
+            }
+        }
+
+        onProgress(100, totalFiles, totalFiles)
+    }
+
     fun dispose() {
         scope.cancel()
         languageMutexes.clear()
-    }
-
-    fun getLocalBytes(language: String): Long {
-        val path = when (language) {
-            "en" -> EN_PATH
-            "de" -> DE_PATH
-            "fr" -> FR_PATH
-            "pl" -> PL_PATH
-            "ru" -> RU_PATH
-            else -> return 0L
-        }
-
-        val file = File(path)
-        return if (file.exists()) file.length() else 0L
-    }
-
-    suspend fun calculateProgress(language: String): Int {
-        val bytes = getLocalBytes(language)
-        if (bytes == 0L) return 0
-
-        val total = getFileSize("$BASE_URL/$language.zip") ?: return 0
-        return ((bytes.toFloat() / total) * 100)
-            .toInt()
-            .coerceIn(0, 99)
     }
 }

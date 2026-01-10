@@ -94,7 +94,7 @@ class LanguageOptionViewModel {
     private fun startDownload(key: String) {
         updateLanguageState(key, started = true, download = true)
 
-        PackagesManager.startLanguageDownload(key) { progress ->
+        PackagesManager.downloadLocalization(key) { progress ->
             updateLanguageState(key, started = true, download = true, progress = progress)
 
             if (progress == 100) {

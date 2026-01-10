@@ -51,3 +51,6 @@
 
 -dontnote okhttp3.**
 -keep class okio.Okio__JvmOkioKt { *; }
+
+-keepnames class com.g3.launcher.model.** { *; }
+-keepnames class com.g3.launcher.entity.** { *; }

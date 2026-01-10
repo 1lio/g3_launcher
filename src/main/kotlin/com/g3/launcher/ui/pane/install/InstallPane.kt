@@ -16,7 +16,6 @@ import com.g3.launcher.g3_laucher.generated.resources.bg2
 import com.g3.launcher.g3_laucher.generated.resources.bg3
 import com.g3.launcher.g3_laucher.generated.resources.bg4
 import com.g3.launcher.model.LocalConfig
-import com.g3.launcher.model.LocalLanguage
 import com.g3.launcher.ui.component.LanguageButton
 import com.g3.launcher.ui.component.LinearProgress
 import com.g3.launcher.ui.component.MainBox

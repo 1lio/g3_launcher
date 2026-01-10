@@ -13,12 +13,8 @@ import com.g3.launcher.model.InstallPackages
 import com.g3.launcher.model.LauncherConfig
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import javax.swing.JFileChooser
 
 class InstallViewModel {
@@ -60,8 +56,14 @@ class InstallViewModel {
     private val installCompleteMap = mutableMapOf<String, Boolean>()
 
     // Дополнительные состояния
+    @Volatile
     private var cleaningComplete = false
+
+    @Volatile
     private var backupComplete = false
+
+    @Volatile
+    private var backupStarted = false
 
     var stage: Stage by mutableStateOf(Stage.Welcome)
         private set
@@ -78,103 +80,45 @@ class InstallViewModel {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val config: LauncherConfig = LauncherManager.config
 
-    init {
-        // Инициализируем загрузку английской локализации по умолчанию
-        selectedLocales.add("en")
-        downloadProgressMap["en"] = 0
-        downloadCompleteMap["en"] = false
-    }
-
     fun runInstall() {
         stage = Stage.PackSelect
-        startBaseDownload()
-        startDefaultLocalizationDownload()
+
+        scope.launch {
+            listOf(
+                async { startBaseDownload() },
+                async { startLocalizationDownload("en") },
+            ).awaitAll()
+        }
     }
 
     private fun startBaseDownload() {
         scope.launch {
+            println("base downloading")
             try {
-                if (PackagesManager.verify("base")) {
-                    baseDownloadComplete = true
-                    baseProgress = 100
-                    downloadProgressMap["base"] = 100
+                PackagesManager.downloadBasePackage { progress ->
+                    baseProgress = progress
+                    downloadProgressMap["base"] = progress
+
+                    println("base downloading $progress%")
+
+                    if (progress == 100) {
+                        baseDownloadComplete = true
+                        println("base download complete")
+                    }
 
                     updateDownloadProgress()
-                    updateSetupStageIfActive()
+                    updateSetupStageIfActive(true)
 
-                    if (areAllDownloadsComplete() && stage is Stage.Setup) {
+                    // Если база загружена и мы на Setup - можно начинать очистку и установку
+                    if (progress == 100 && stage is Stage.Setup) {
                         checkAndStartInstallation()
                     }
-                } else {
-                    PackagesManager.installBasePackage { progress ->
-                        baseProgress = progress
-                        downloadProgressMap["base"] = progress
-                        if (progress == 100) {
-                            baseDownloadComplete = true
-                            LauncherManager.updateConfig {
-                                val update = config.packages.toMutableList()
-                                update.add("base")
 
-                                copy(packages = update.toSet().toList())
-                            }
-                        }
-
-                        updateDownloadProgress()
-                        updateSetupStageIfActive()
-
-                        // Если база загружена и мы на Setup - можно начинать очистку и установку
-                        if (progress == 100 && stage is Stage.Setup) {
-                            checkAndStartInstallation()
-                        }
-                    }
                 }
                 println("Base download completed")
             } catch (e: Exception) {
                 println("Base download failed: ${e.message}")
                 stage = Stage.Error("Failed to download base package: ${e.message}")
-            }
-        }
-    }
-
-    private fun startDefaultLocalizationDownload() {
-        // Загружаем английскую локализацию по умолчанию
-        scope.launch {
-            try {
-                if (PackagesManager.verify("en")) {
-                    downloadProgressMap["en"] = 100
-
-                    updateDownloadProgress()
-                    updateSetupStageIfActive()
-
-                    // Если все загружено и мы на Setup - можно начинать установку локализаций
-                    if (areAllDownloadsComplete() && stage is Stage.Setup) {
-                        checkAndStartInstallation()
-                    }
-                } else {
-                    PackagesManager.installLanguagePackage("en") { progress ->
-                        downloadProgressMap["en"] = progress
-                        if (progress == 100) {
-                            downloadCompleteMap["en"] = true
-                            LauncherManager.updateConfig {
-                                val update = config.packages.toMutableList()
-                                update.add("en")
-
-                                copy(packages = update.toSet().toList())
-                            }
-                        }
-
-                        updateDownloadProgress()
-                        updateSetupStageIfActive()
-
-                        // Если все загружено и мы на Setup - можно начинать установку локализаций
-                        if (areAllDownloadsComplete() && stage is Stage.Setup) {
-                            checkAndStartInstallation()
-                        }
-                    }
-                }
-                println("Default EN localization download completed")
-            } catch (e: Exception) {
-                println("EN localization download failed: ${e.message}")
             }
         }
     }
@@ -187,9 +131,7 @@ class InstallViewModel {
         if (newSelectedLocales.isNotEmpty()) {
             selectedLocales = newSelectedLocales
         }
-        // Если не выбрано ни одной локализации, оставляем английскую по умолчанию
 
-        // Загружаем новые локализации, которые еще не загружались
         val localesToDownload = selectedLocales.filter { locale ->
             !downloadCompleteMap.containsKey(locale) || downloadCompleteMap[locale] == false
         }
@@ -202,42 +144,26 @@ class InstallViewModel {
     }
 
     private fun startLocalizationDownload(locale: String) {
+        println("$locale localization downloading")
         scope.launch {
             try {
-                if (PackagesManager.verify(locale)) {
-                    downloadCompleteMap[locale] = true
-                    downloadProgressMap[locale] = 100
+                PackagesManager.downloadLocalization(locale) { progress ->
+                    downloadProgressMap[locale] = progress
+                    if (progress == 100) {
+                        downloadCompleteMap[locale] = true
+                        println("$locale localization download completed")
+                    }
 
                     updateDownloadProgress()
-                    updateSetupStageIfActive()
+                    updateSetupStageIfActive(true)
 
+                    println("$locale localization downloading $progress%")
+
+                    // Если все загружено и мы на Setup - можно начинать установку локализаций
                     if (areAllDownloadsComplete() && stage is Stage.Setup) {
                         checkAndStartInstallation()
                     }
-                } else {
-                    PackagesManager.installLanguagePackage(locale) { progress ->
-                        downloadProgressMap[locale] = progress
-                        if (progress == 100) {
-                            downloadCompleteMap[locale] = true
-
-                            LauncherManager.updateConfig {
-                                val update = config.packages.toMutableList()
-                                update.add(locale)
-
-                                copy(packages = update.toSet().toList())
-                            }
-                        }
-
-                        updateDownloadProgress()
-                        updateSetupStageIfActive()
-
-                        // Если все загружено и мы на Setup - можно начинать установку локализаций
-                        // if (areAllDownloadsComplete() && stage is Stage.Setup) {
-                        //     checkAndStartInstallation()
-                        // }
-                    }
                 }
-                println("$locale localization download completed")
             } catch (e: Exception) {
                 println("$locale localization download failed: ${e.message}")
             }
@@ -248,11 +174,11 @@ class InstallViewModel {
         stage = Stage.Setup(
             steps = buildSetupSteps()
         )
-
-        startDefaultLocalizationDownload()
-
-        // Проверяем, можно ли начинать установку
-        checkAndStartInstallation()
+        scope.launch {
+            delay(300)
+            // Проверяем, можно ли начинать установку
+            checkAndStartInstallation()
+        }
     }
 
     private fun checkAndStartInstallation() {
@@ -262,18 +188,25 @@ class InstallViewModel {
             try {
                 // 3. Если базовый архив загружен - выполняем очистку и установку
                 if (baseDownloadComplete && !baseInstallComplete) {
+                    updateSetupStageIfActive(false)
                     performGameCleaning()
                     installBasePackage()
                 }
 
                 // 4. После распаковки base можно распаковывать локализации
                 if (baseInstallComplete && areAllDownloadsComplete()) {
+                    updateSetupStageIfActive(false)
                     installLocalizationPackages()
                 }
 
                 // 5. Последний шаг - бекап
-                if (areAllInstallationsComplete()) {
-                    createBackup()
+                if (areAllInstallationsComplete() && !backupStarted) {
+                    backupStarted = true
+                    updateSetupStageIfActive(true)
+
+                    scope.launch {
+                        createBackup()
+                    }
                 }
             } catch (e: Exception) {
                 println("Installation failed: ${e.message}")
@@ -454,29 +387,30 @@ class InstallViewModel {
     }
 
     private fun installBasePackage() {
-        val baseFile = File("app/resources/base.zip")
-        if (!baseFile.exists()) {
-            throw IllegalStateException("Base file not found")
-        }
-
         val gamePath = LauncherManager.config.gameDirPath ?: return
 
-        try {
-            baseFile.inputStream().use { input ->
-                extractZipArchive(input, File(gamePath)) { progress ->
-                    updateStep(SetupStep.BaseInstall(progress))
-                    updateInstallProgress()
-                }
-            }
-        } catch (e: Exception) {
-            stage = Stage.Error("Install patches: internal error")
-            e.printStackTrace()
-            throw e
-        }
+        scope.launch {
+            try {
+                PackagesManager.extractBasePackage(gamePath) { percent, count, total ->
+                    if (percent == 100) {
+                        baseInstallComplete = true
+                        updateStep(SetupStep.BaseInstall(100))
+                        updateInstallProgress()
+                        checkAndStartInstallation()
 
-        baseInstallComplete = true
-        updateInstallProgress()
-        println("Base installation completed")
+                        println("Base installation completed")
+                    } else {
+                        updateStep(SetupStep.BaseInstall(percent))
+                        updateInstallProgress()
+                    }
+                }
+
+            } catch (e: Exception) {
+                stage = Stage.Error("Install patches: internal error")
+                e.printStackTrace()
+                throw e
+            }
+        }
     }
 
     private fun installLocalizationPackages() {
@@ -500,98 +434,84 @@ class InstallViewModel {
 
         val gamePath = LauncherManager.config.gameDirPath ?: return
 
-        for (locale in selectedLocales) {
-            if (installCompleteMap[locale] == true) continue
+        scope.launch {
+            for (locale in selectedLocales) {
+                try {
+                    println("localization install $locale")
 
-            val localeFile = File("app/resources/$locale.zip")
-            if (!localeFile.exists()) continue
+                    PackagesManager.extractLocalizationPackage(
+                        localizationKey = locale,
+                        gameDirPath = gamePath,
+                    ) { percent, count, total ->
+                        if (percent == 100) {
+                            println("localization installed $locale")
+                        }
 
-            try {
-                localeFile.inputStream().use { input ->
-                    extractZipArchive(input, File("$gamePath/Data")) {}
-                }
-            } catch (e: Exception) {
-                stage = Stage.Error("Install locale $locale: internal error")
-                e.printStackTrace()
-                throw e
-            }
-
-            installedCount++
-            installCompleteMap[locale] = true
-
-            updateStep(
-                SetupStep.LocalizationInstall(
-                    progress = if (total > 0) (installedCount * 100) / total else 0,
-                    count = installedCount,
-                    total = total
-                )
-            )
-            updateInstallProgress()
-        }
-    }
-
-    private fun extractZipArchive(inputStream: InputStream, outputDir: File, onProgress: (Int) -> Unit) {
-        val buffer = ByteArray(1024)
-        ZipInputStream(inputStream).use { zis ->
-            var entry: ZipEntry?
-            var processedEntries = 0
-
-            while (zis.nextEntry.also { entry = it } != null) {
-                val currentEntry = entry ?: continue
-                val outputFile = File(outputDir, currentEntry.name)
-
-                if (currentEntry.isDirectory) {
-                    outputFile.mkdirs()
-                } else {
-                    outputFile.parentFile?.mkdirs()
-                    FileOutputStream(outputFile).use { fos ->
-                        var bytesRead: Int
-                        while (zis.read(buffer).also { bytesRead = it } >= 0) {
-                            fos.write(buffer, 0, bytesRead)
+                        if (selectedLocales.size == 1) {
+                            updateStep(
+                                SetupStep.LocalizationInstall(
+                                    progress = percent,
+                                    count = installedCount,
+                                    total = total
+                                )
+                            )
                         }
                     }
+                } catch (e: Exception) {
+                    stage = Stage.Error("Install locale $locale: internal error")
+                    e.printStackTrace()
+                    throw e
                 }
 
-                processedEntries++
-                onProgress(processedEntries)
-            }
-        }
+                installedCount++
+                installCompleteMap[locale] = true
 
-        onProgress(100)
+                updateStep(
+                    SetupStep.LocalizationInstall(
+                        progress = if (total > 0) (installedCount * 100) / total else 0,
+                        count = installedCount,
+                        total = total
+                    )
+                )
+                updateInstallProgress()
+            }
+            checkAndStartInstallation()
+        }
     }
 
     private suspend fun createBackup() {
         updateStep(SetupStep.CreateBackup(false))
 
         val savesDir = LauncherManager.config.gameSaveDirPath ?: return
-
         val backupDir = File(savesDir, "Save_Backup_${System.currentTimeMillis()}")
         backupDir.mkdirs()
 
         File(savesDir)
             .listFiles()
-            ?.toList()
-            ?.parallelStream()
+            ?.filter { it.isFile && !it.name.startsWith("Save_Backup_") }
             ?.forEach { file ->
-                if (file.isFile) {
-                    val backupFile = File(backupDir, file.name)
-                    Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                }
+                Files.copy(
+                    file.toPath(),
+                    File(backupDir, file.name).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
             }
-
-        delay(500)
 
         backupComplete = true
         updateStep(SetupStep.CreateBackup(true))
         updateInstallProgress()
 
-        println("First config...")
+        LauncherManager.updateConfig {
+            copy(
+                installed = true,
+                packages = PackagesManager.getAvailablePackages()
+            )
+        }
+
         GameManager.firstConfig()
         GameSaveManager.firstConfig(config.packages)
-        // Installation completed
-        println("Installation completed successfully!")
 
-        LauncherManager.updateConfig { copy(installed = true) }
+        scope.cancel()
     }
 
     private fun updateStep(newStep: SetupStep) {
@@ -674,10 +594,10 @@ class InstallViewModel {
         }
     }
 
-    private fun updateSetupStageIfActive() {
+    private fun updateSetupStageIfActive(enabled: Boolean) {
         if (stage is Stage.Setup) {
             stage = Stage.Setup(
-                closeEnabled = true,
+                closeEnabled = enabled,
                 steps = buildSetupSteps()
             )
         }
@@ -758,9 +678,17 @@ class InstallViewModel {
     }
 
     private fun areAllInstallationsComplete(): Boolean {
-        return baseInstallComplete &&
+        val result = baseInstallComplete &&
                 selectedLocales.all { installCompleteMap[it] == true } &&
                 cleaningComplete
+
+        println("areAllInstallationsComplete")
+        println("baseInstallComplete $baseInstallComplete")
+        println("selectedLocales $selectedLocales")
+        println("installCompleteMap $installCompleteMap")
+        println("cleaningComplete $cleaningComplete")
+
+        return result
     }
 
     // =======

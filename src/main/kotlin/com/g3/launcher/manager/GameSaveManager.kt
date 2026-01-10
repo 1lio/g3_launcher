@@ -252,11 +252,16 @@ object GameSaveManager {
     }
 
     fun setGraphicsPreset(preset: GraphicsPreset) {
+        val presetName = when (preset) {
+            is G3GraphicPreset -> preset.name
+            else -> "VeryHigh"
+        }
+
         IniFileManager.updateValue(
             filePath = path,
             section = "Options.Details",
             key = "Performance",
-            newValue = preset.name
+            newValue = presetName
         )
 
         IniFileManager.updateValue(
@@ -357,7 +362,7 @@ object GameSaveManager {
 
         // Копируем только файлы, исключая указанные папки
         sourceDir.listFiles()?.forEach { file ->
-            if (file.name !in skipDirectories) {
+            if (file.name !in skipDirectories && !file.name.contains("Save_Backup", true)) {
                 val targetFile = File(targetDir, file.name)
                 try {
                     if (file.isFile && shouldCopyFile(file)) { // Копируем только файлы
