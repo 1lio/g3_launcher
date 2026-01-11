@@ -233,6 +233,8 @@ object GameManager {
             key = "Physics.Threads",
             newValue = "${DeviceManager.AVAILABLE_PROCESSOR}"
         )
+
+        setDistancePreset(G3DistancePreset.Medium)
     }
 
     fun setDistancePreset(preset: DistancePreset) {

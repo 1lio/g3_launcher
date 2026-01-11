@@ -245,33 +245,34 @@ class InstallViewModel {
             "sapi_lipsync.dll",
             "site.url",
             "vcomp.dll",
-            "Data${File.separator}_compiledAnimation.p00",
-            "Data${File.separator}_compiledImage.p00",
-            "Data${File.separator}Infos.p01",
-            "Data${File.separator}Infos.p00",
-            "Data${File.separator}Library.p00",
-            "Data${File.separator}Quests.p00",
-            "Data${File.separator}Quests.p01",
-            "Data${File.separator}Sound.p01",
-            "Data${File.separator}Music.p00",
-            "Data${File.separator}Speech_German.p00",
-            "Data${File.separator}Templates.p01",
-            "Data${File.separator}_compiledImage.p01",
-            "Data${File.separator}Projects_compiled.p00",
-            "Data${File.separator}Projects_compiled.p01",
-            "Data${File.separator}_intern.pak",
-            "Data${File.separator}gui.p00",
-            "Data${File.separator}gui.p01",
-            "Data${File.separator}Sound.p00",
-            "Data${File.separator}Strings.p00",
-            "Data${File.separator}Templates.p00",
-            "Data${File.separator}Video${File.separator}G3_Logo_02.bik",
-            "Data${File.separator}Video${File.separator}G3_Logo_03.bik",
-            "Data${File.separator}Video${File.separator}G3_Logo_04.bik",
-            "Data${File.separator}Video${File.separator}G3_Credits2.bik",
-            "Ini${File.separator}G3_World_01_local.wrldatasc",
-            "Ini${File.separator}ge3local.ini",
-            "Ini${File.separator}keyboard_and_console.txt",
+            "Data\\_compiledAnimation.p00",
+            "Data\\_compiledImage.p00",
+            "Data\\Infos.p01",
+            "Data\\Infos.p00",
+            "Data\\Library.p00",
+            "Data\\Quests.p00",
+            "Data\\Quests.p01",
+            "Data\\Sound.p01",
+            "Data\\Music.p00",
+            "Data\\Speech_German.p00",
+            "Data\\Templates.p01",
+            "Data\\_compiledImage.p01",
+            "Data\\Projects_compiled.p00",
+            "Data\\Projects_compiled.p01",
+            "Data\\_intern.pak",
+            "Data\\gui.p00",
+            "Data\\gui.p01",
+            "Data\\Sound.p00",
+            "Data\\Strings.p00",
+            "Data\\Templates.p00",
+            "Data\\Video\\G3_Logo_02.bik",
+            "Data\\Video\\G3_Logo_03.bik",
+            "Data\\Video\\G3_Logo_04.bik",
+            "Data\\Video\\G3_Credits2.bik",
+            "Ini\\G3_World_01_local.wrldatasc",
+            "Ini\\ge3local.ini",
+            "Ini\\keyboard_and_console.txt",
+            "Ini\\mountlist.INI",
         )
 
         var deletedCount = 0
@@ -508,8 +509,8 @@ class InstallViewModel {
             )
         }
 
+        GameSaveManager.firstConfig(PackagesManager.getAvailablePackages())
         GameManager.firstConfig()
-        GameSaveManager.firstConfig(config.packages)
 
         scope.cancel()
     }

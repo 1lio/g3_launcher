@@ -4,11 +4,17 @@ import java.awt.GraphicsEnvironment
 import java.lang.management.ManagementFactory
 import kotlin.math.roundToInt
 
+data class ScreenResolution(
+    val width: Int,
+    val height: Int
+)
+
 object DeviceManager {
 
     val FRAME_RATE: Int = getScreenRefreshRate()
     val AVAILABLE_PROCESSOR: Int = getPhysicalCoresCount().takeIf { it <= 4 } ?: 4
     val AVAILABLE_RAM: Int = getTotalRamInGB()?.takeIf { it <= 4 } ?: 4
+    val SCREEN_RESOLUTION: ScreenResolution = getScreenResolution()
 
     private fun getScreenRefreshRate(): Int {
         val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
@@ -33,5 +39,17 @@ object DeviceManager {
             e.printStackTrace()
             null
         }
+    }
+
+    private fun getScreenResolution(): ScreenResolution {
+        val device = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .defaultScreenDevice
+
+        val mode = device.displayMode
+        return ScreenResolution(
+            width = mode.width,
+            height = mode.height
+        )
     }
 }
